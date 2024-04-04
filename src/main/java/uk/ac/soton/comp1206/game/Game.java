@@ -1,5 +1,6 @@
 package uk.ac.soton.comp1206.game;
 
+import javafx.beans.property.SimpleIntegerProperty;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.ac.soton.comp1206.component.GameBlock;
@@ -29,6 +30,11 @@ public class Game {
      * The grid model linked to the game
      */
     protected final Grid grid;
+
+    SimpleIntegerProperty score = new SimpleIntegerProperty(0);
+    SimpleIntegerProperty level = new SimpleIntegerProperty(0);
+    SimpleIntegerProperty lives = new SimpleIntegerProperty(3);
+    SimpleIntegerProperty multiplier = new SimpleIntegerProperty(1);
 
     GamePiece currentPiece;
 
@@ -80,6 +86,7 @@ public class Game {
             logger.info("piece true");
             grid.playPiece(currentPiece,x,y);
             nextPiece();
+            afterPiece();
         }
 
     }
@@ -108,12 +115,28 @@ public class Game {
         return rows;
     }
 
+    public SimpleIntegerProperty getScore() {
+        return score;
+    }
+
+    public SimpleIntegerProperty getLevel(){
+        return level;
+    }
+
+    public SimpleIntegerProperty getLives() {
+        return lives;
+    }
+
+    public SimpleIntegerProperty getMultiplier() {
+        return multiplier;
+    }
+
     public GamePiece spawnPiece(){
         Random randomnumber = new Random();
         int[][] blocks = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
         GamePiece newpiece = null;
         //return newpiece.createPiece(randomnumber.nextInt(15));
-        return newpiece.createPiece(9);
+        return newpiece.createPiece(3);
     }
 
     public void nextPiece(){
@@ -121,21 +144,72 @@ public class Game {
     }
 
     public void afterPiece(){
-        HashSet<GameBlock> todelete = new HashSet<GameBlock>();
+        HashSet<Integer> rowstodelete = new HashSet<>();
+        HashSet<Integer> columnstodelete = new HashSet<>();
+        HashSet<SimpleIntegerProperty[][]> blocksdeleted = new HashSet<>();
+        countrows(rowstodelete);
+        countcolumns(columnstodelete);
+        for (int row: rowstodelete){
+            for (int column = 0; column < 5; column++) {
+                grid.set(column,row,0);
+                blocksdeleted.add(new SimpleIntegerProperty[column][row]);
+            }
+            logger.info("row"+row+"deleted");
+        }
+        for (int column:columnstodelete){
+            for (int row = 0; row < 5; row++) {
+                grid.set(column,row,0);
+                blocksdeleted.add(new SimpleIntegerProperty[column][row]);
+            }
+            logger.info("column"+column+"deleted");
+        }
+        int prevscore = score.getValue();
+        score(rowstodelete.size()+columnstodelete.size(), blocksdeleted.size());
+        int newscore = score.getValue();
+        if (prevscore!=newscore){
+            multiplier.set(multiplier.getValue()+1);
+            level.set((score.getValue()/1000));
+        }else{
+            multiplier.set(1);
+        }
+
+
+    }
+
+    public void countrows(HashSet<Integer> rowstodelete){
         int count = 0;
-        for (int x=0;x<5;x++){
-            for(int y=0;y<5;y++){
-                if(!(grid.get(x,y)==0)){
+        for (int x = 0; x < 5; x++) {
+            for (int y = 0; y < 5; y++) {
+                if (!(grid.get(y, x) == 0)) {
+                    count++;
+                }
+            }
+            if(count==5){
+                rowstodelete.add(x);
+                logger.info("added"+x+"row to delete");
+            }
+            count=0;
+        }
+    }
+    public void countcolumns(HashSet<Integer> columnstodelete){
+        int count = 0;
+        for (int x = 0; x < 5; x++) {
+            for (int y = 0; y < 5; y++) {
+                if (!(grid.get(x, y) == 0)) {
                     count++;
                 }
             }
             if (count==5){
-                todelete.add(grid.g);
+                columnstodelete.add(x);
+                logger.info("added"+x+"column to delete");
             }
+            count=0;
         }
-
     }
 
+    public void score(int nolines, int noblocks){
+        score.set(score.getValue()+(nolines*noblocks*10*multiplier.getValue()));
+    }
 
 
 }
