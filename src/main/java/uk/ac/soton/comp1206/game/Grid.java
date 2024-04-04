@@ -103,4 +103,34 @@ public class Grid {
         return rows;
     }
 
+    public boolean canPlayPiece(GamePiece gamePiece, int x, int y){
+        int[][] pieceshape = gamePiece.getBlocks();
+        boolean returnvalue = true;
+        for (int i=0;i<3;i++){
+            for(int j=0;j<3;j++){
+                if(!(pieceshape[i][j]==0)){
+                    int positionx = 1-i;
+                    int positiony = j-1;
+                    if(!(get(x-positionx,y+positiony)==0)){
+                        returnvalue = false;
+                    }
+                }
+            }
+        }
+        return returnvalue;
+    }
+
+    public void playPiece(GamePiece gamePiece, int x, int y){
+        int[][] pieceshape = gamePiece.getBlocks();
+        for (int i=0;i<3;i++){
+            for(int j=0;j<3;j++){
+                if(!(pieceshape[i][j]==0)){
+                    int positionx = i-1;
+                    int positiony = j-1;
+                    set(x + positionx, y + positiony, gamePiece.getValue());
+                }
+            }
+        }
+    }
+
 }

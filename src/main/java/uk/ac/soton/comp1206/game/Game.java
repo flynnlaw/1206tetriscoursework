@@ -4,6 +4,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.ac.soton.comp1206.component.GameBlock;
 
+import java.util.HashSet;
+import java.util.Random;
+
 /**
  * The Game class handles the main logic, state and properties of the TetrECS game. Methods to manipulate the game state
  * and to handle actions made by the player should take place inside this class.
@@ -26,6 +29,8 @@ public class Game {
      * The grid model linked to the game
      */
     protected final Grid grid;
+
+    GamePiece currentPiece;
 
     /**
      * Create a new game with the specified rows and columns. Creates a corresponding grid model.
@@ -53,6 +58,7 @@ public class Game {
      */
     public void initialiseGame() {
         logger.info("Initialising game");
+        currentPiece = spawnPiece();
     }
 
     /**
@@ -70,9 +76,12 @@ public class Game {
         if (newValue  > GamePiece.PIECES) {
             newValue = 0;
         }
+        if(grid.canPlayPiece(currentPiece,x,y)){
+            logger.info("piece true");
+            grid.playPiece(currentPiece,x,y);
+            nextPiece();
+        }
 
-        //Update the grid with the new value
-        grid.set(x,y,newValue);
     }
 
     /**
@@ -98,6 +107,35 @@ public class Game {
     public int getRows() {
         return rows;
     }
+
+    public GamePiece spawnPiece(){
+        Random randomnumber = new Random();
+        int[][] blocks = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+        GamePiece newpiece = null;
+        //return newpiece.createPiece(randomnumber.nextInt(15));
+        return newpiece.createPiece(9);
+    }
+
+    public void nextPiece(){
+        currentPiece = spawnPiece();
+    }
+
+    public void afterPiece(){
+        HashSet<GameBlock> todelete = new HashSet<GameBlock>();
+        int count = 0;
+        for (int x=0;x<5;x++){
+            for(int y=0;y<5;y++){
+                if(!(grid.get(x,y)==0)){
+                    count++;
+                }
+            }
+            if (count==5){
+                todelete.add(grid.g);
+            }
+        }
+
+    }
+
 
 
 }
