@@ -31,6 +31,9 @@ public class Game {
      */
     protected final Grid grid;
 
+    protected final Grid pieceboard;
+
+
     SimpleIntegerProperty score = new SimpleIntegerProperty(0);
     SimpleIntegerProperty level = new SimpleIntegerProperty(0);
     SimpleIntegerProperty lives = new SimpleIntegerProperty(3);
@@ -49,6 +52,7 @@ public class Game {
 
         //Create a new grid model to represent the game state
         this.grid = new Grid(cols,rows);
+        this.pieceboard = new Grid(3,3);
     }
 
     /**
@@ -65,6 +69,7 @@ public class Game {
     public void initialiseGame() {
         logger.info("Initialising game");
         currentPiece = spawnPiece();
+        updatepieceboard(currentPiece);
     }
 
     /**
@@ -82,11 +87,25 @@ public class Game {
         if (newValue  > GamePiece.PIECES) {
             newValue = 0;
         }
+
         if(grid.canPlayPiece(currentPiece,x,y)){
             logger.info("piece true");
             grid.playPiece(currentPiece,x,y);
             nextPiece();
             afterPiece();
+            updatepieceboard(currentPiece);
+        }
+
+    }
+
+    public void updatepieceboard(GamePiece gamePiece){
+        int[][] pieceshape = gamePiece.getBlocks();
+        for(int x=0;x<3;x++){
+            for(int y=0;y<3;y++){
+                if(!(pieceshape[x][y]==0)){
+                    pieceboard.set(x, y, gamePiece.getValue());
+                }
+            }
         }
 
     }
@@ -98,6 +117,9 @@ public class Game {
     public Grid getGrid() {
         return grid;
     }
+
+    public Grid getPieceboard(){return pieceboard;}
+
 
     /**
      * Get the number of columns in this game
@@ -132,11 +154,12 @@ public class Game {
     }
 
     public GamePiece spawnPiece(){
+        pieceboard.emptygrid();
         Random randomnumber = new Random();
         int[][] blocks = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
         GamePiece newpiece = null;
-        //return newpiece.createPiece(randomnumber.nextInt(15));
-        return newpiece.createPiece(3);
+        return newpiece.createPiece(randomnumber.nextInt(15));
+        //return newpiece.createPiece(3);
     }
 
     public void nextPiece(){

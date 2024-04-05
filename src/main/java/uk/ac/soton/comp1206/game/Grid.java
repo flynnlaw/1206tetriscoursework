@@ -133,4 +133,11 @@ public class Grid {
         }
     }
 
+    public void emptygrid(){
+        for (int i=0;i<3;i++){
+            for(int j=0;j<3;j++){
+                set(i,j,0);
+            }
+        }
+    }
 }

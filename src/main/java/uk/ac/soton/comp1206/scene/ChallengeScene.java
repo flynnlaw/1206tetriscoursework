@@ -5,15 +5,20 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.*;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.text.Text;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.ac.soton.comp1206.component.GameBlock;
 import uk.ac.soton.comp1206.component.GameBoard;
+import uk.ac.soton.comp1206.component.PieceBoard;
 import uk.ac.soton.comp1206.game.Game;
 import uk.ac.soton.comp1206.ui.GamePane;
 import uk.ac.soton.comp1206.ui.GameWindow;
+import uk.ac.soton.comp1206.ui.Multimedia;
 
+import java.io.File;
 import java.io.StreamCorruptedException;
 
 /**
@@ -23,6 +28,7 @@ public class ChallengeScene extends BaseScene {
 
     private static final Logger logger = LogManager.getLogger(MenuScene.class);
     protected Game game;
+    Multimedia multimedia = new Multimedia();
 
     /**
      * Create a new Single Player challenge scene
@@ -49,12 +55,18 @@ public class ChallengeScene extends BaseScene {
         challengePane.setMaxHeight(gameWindow.getHeight());
         challengePane.getStyleClass().add("menu-background");
         root.getChildren().add(challengePane);
+        String path = "src/main/resources/music/game_start.wav";
+        String pathtwo = "src/main/resources/music/game.wav";
+        Media gamestart = new Media(new File(path).toURI().toString());
+        Media gamemusic = new Media(new File(pathtwo).toURI().toString());
+        multimedia.playgamemusic(gamestart, gamemusic);
 
         var mainPane = new BorderPane();
         challengePane.getChildren().add(mainPane);
         VBox vbox = new VBox();
         mainPane.setRight(vbox);
         var board = new GameBoard(game.getGrid(),gameWindow.getWidth()/2,gameWindow.getWidth()/2);
+        var pieceboard = new PieceBoard(game.getPieceboard(), gameWindow.getWidth()/4, gameWindow.getWidth()/4);
         var score = new Text();
         var scoreLabel = new Text("Score");
         var multiplier = new Text();
@@ -76,6 +88,7 @@ public class ChallengeScene extends BaseScene {
         vbox.getChildren().add(multiplier);
         vbox.getChildren().add(levelLabel);
         vbox.getChildren().add(level);
+        vbox.getChildren().add(pieceboard);
         mainPane.setCenter(board);
 
 
