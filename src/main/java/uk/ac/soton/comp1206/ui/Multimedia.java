@@ -8,6 +8,8 @@ import java.io.File;
 
 public class Multimedia {
 
+    Media media;
+
     MediaPlayer audioplayer;
     MediaPlayer musicplayer;
 
@@ -16,7 +18,8 @@ public class Multimedia {
         audioplayer.setAutoPlay(true);
     }
 
-    public void playinloop(Media media) {
+    public void playinloop(Media pmedia) {
+        media = pmedia;
         musicplayer = new MediaPlayer(media);
         musicplayer.setAutoPlay(true);
         musicplayer.setOnEndOfMedia(new Runnable() {
@@ -33,12 +36,18 @@ public class Multimedia {
     }
 
 
+
+    public void playmenumusic(Media media){
+        playinloop(media);
+    }
     public void playgamemusic(Media mediaone, Media mediatwo){
+        media = mediaone;
         musicplayer = getmusicplayer(mediaone);
         musicplayer.play();
         musicplayer.setOnEndOfMedia(() -> {
             musicplayer.stop(); // Stop the first media player
-            playinloop(mediatwo); // Start playing the second media player
+            media=mediatwo;
+            playinloop(media); // Start playing the second media player
         });
 
     }
