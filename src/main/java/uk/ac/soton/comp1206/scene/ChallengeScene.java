@@ -1,34 +1,40 @@
 package uk.ac.soton.comp1206.scene;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextFormatter;
+import javafx.event.EventHandler;
+import javafx.scene.control.Button;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
 import javafx.scene.text.Text;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.ac.soton.comp1206.component.GameBlock;
 import uk.ac.soton.comp1206.component.GameBoard;
 import uk.ac.soton.comp1206.component.PieceBoard;
+import uk.ac.soton.comp1206.event.NextPieceListener;
+import uk.ac.soton.comp1206.event.RightClickedListener;
 import uk.ac.soton.comp1206.game.Game;
+import uk.ac.soton.comp1206.game.GamePiece;
 import uk.ac.soton.comp1206.ui.GamePane;
 import uk.ac.soton.comp1206.ui.GameWindow;
 import uk.ac.soton.comp1206.ui.Multimedia;
 
 import java.io.File;
-import java.io.StreamCorruptedException;
 
 /**
  * The Single Player challenge scene. Holds the UI for the single player challenge mode in the game.
  */
-public class ChallengeScene extends BaseScene {
+public class ChallengeScene extends BaseScene implements NextPieceListener, RightClickedListener {
 
     private static final Logger logger = LogManager.getLogger(MenuScene.class);
     protected Game game;
     Multimedia multimedia = new Multimedia();
+
+    private PieceBoard pieceboard;
+    private PieceBoard nextpieceboard;
+
+
 
     /**
      * Create a new Single Player challenge scene
@@ -37,6 +43,7 @@ public class ChallengeScene extends BaseScene {
     public ChallengeScene(GameWindow gameWindow) {
         super(gameWindow);
         logger.info("Creating Challenge Scene");
+
     }
 
     /**
@@ -47,6 +54,15 @@ public class ChallengeScene extends BaseScene {
         logger.info("Building " + this.getClass().getName());
 
         setupGame();
+        var board = new GameBoard(game.getGrid(),gameWindow.getWidth()/2,gameWindow.getWidth()/2);
+        pieceboard = new PieceBoard(game.getPieceboard(), gameWindow.getWidth()/4, gameWindow.getHeight()/4);
+        nextpieceboard = new PieceBoard(game.getnextpieceboard(), gameWindow.getWidth()/6, gameWindow.getHeight()/6);
+
+        game.setNextPieceListener(this);
+        pieceboard.setOnRightClicked(this);
+        nextpieceboard.setOnMouseClicked(event -> game.swapcurrentpiece());
+
+
 
         root = new GamePane(gameWindow.getWidth(),gameWindow.getHeight());
 
@@ -65,8 +81,6 @@ public class ChallengeScene extends BaseScene {
         challengePane.getChildren().add(mainPane);
         VBox vbox = new VBox();
         mainPane.setRight(vbox);
-        var board = new GameBoard(game.getGrid(),gameWindow.getWidth()/2,gameWindow.getWidth()/2);
-        var pieceboard = new PieceBoard(game.getPieceboard(), gameWindow.getWidth()/4, gameWindow.getWidth()/4);
         var score = new Text();
         var scoreLabel = new Text("Score");
         var multiplier = new Text();
@@ -89,6 +103,7 @@ public class ChallengeScene extends BaseScene {
         vbox.getChildren().add(levelLabel);
         vbox.getChildren().add(level);
         vbox.getChildren().add(pieceboard);
+        vbox.getChildren().add(nextpieceboard);
         mainPane.setCenter(board);
 
 
@@ -104,6 +119,7 @@ public class ChallengeScene extends BaseScene {
     private void blockClicked(GameBlock gameBlock) {
         game.blockClicked(gameBlock);
     }
+
 
     /**
      * Setup the game object and model
@@ -122,6 +138,36 @@ public class ChallengeScene extends BaseScene {
     public void initialise() {
         logger.info("Initialising Challenge");
         game.start();
+        scene.setOnKeyPressed(
+                new EventHandler<KeyEvent>() {
+                    @Override
+                    public void handle(KeyEvent keyEvent) {
+                        if (keyEvent.getCode().equals(KeyCode.ESCAPE)) {
+                            gameWindow.cleanup();
+                            multimedia.stopmusicplayer();
+                            gameWindow.startMenu();
+                        }
+                    }
+                });
+
+
     }
 
+
+    @Override
+    public void nextpiece(GamePiece piece) {
+        pieceboard.displaypiece(piece);
+
+    }
+    @Override
+    public void followingpiece(GamePiece piece){
+        nextpieceboard.emptygrid();
+        nextpieceboard.displaypiece(piece);
+    }
+
+    @Override
+    public void onRightClicked() {
+        pieceboard.emptygrid();
+        game.rotatecurrentpiece();
+    }
 }

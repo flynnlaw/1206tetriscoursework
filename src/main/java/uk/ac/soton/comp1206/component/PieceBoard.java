@@ -37,6 +37,26 @@ public class PieceBoard extends GameBoard{
         return newpiece.createPiece(value);
     }
 
+    public void displaypiece(GamePiece piece){
+        int[][] gridneeded = piece.getBlocks();
+        int value = piece.getValue();
+        for(int j=0;j<3;j++){
+            for(int k=0;k<3;k++){
+                if(!(gridneeded[j][k]==0)){
+                    grid.set(j,k,value);
+                }
+            }
+        }
+    }
+
+    public void emptygrid(){
+        for (int i=0;i<3;i++){
+            for(int j=0;j<3;j++){
+                grid.set(i,j,0);
+            }
+        }
+    }
+
 
 
 

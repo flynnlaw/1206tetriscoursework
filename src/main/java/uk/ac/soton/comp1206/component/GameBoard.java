@@ -1,10 +1,12 @@
 package uk.ac.soton.comp1206.component;
 
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.ac.soton.comp1206.event.BlockClickedListener;
+import uk.ac.soton.comp1206.event.RightClickedListener;
 import uk.ac.soton.comp1206.game.Grid;
 
 /**
@@ -56,6 +58,8 @@ public class GameBoard extends GridPane {
      */
     private BlockClickedListener blockClickedListener;
 
+    private RightClickedListener rightClickedListener;
+
 
     /**
      * Create a new GameBoard, based off a given grid, with a visual width and height.
@@ -72,6 +76,7 @@ public class GameBoard extends GridPane {
 
         //Build the GameBoard
         build();
+        setOnMouseClicked(this::handleRightClick);
     }
 
     /**
@@ -122,6 +127,7 @@ public class GameBoard extends GridPane {
                 createBlock(x,y);
             }
         }
+
     }
 
     /**
@@ -169,6 +175,17 @@ public class GameBoard extends GridPane {
 
         if(blockClickedListener != null) {
             blockClickedListener.blockClicked(block);
+        }
+    }
+
+    public void setOnRightClicked(RightClickedListener rightClickedListener) {
+        this.rightClickedListener = rightClickedListener;
+    }
+
+    private void handleRightClick(MouseEvent event) {
+        if (rightClickedListener != null) {
+            rightClickedListener.onRightClicked();
+            logger.info("clck");
         }
     }
 

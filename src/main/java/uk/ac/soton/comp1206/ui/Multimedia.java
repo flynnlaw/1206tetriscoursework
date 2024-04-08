@@ -16,6 +16,7 @@ public class Multimedia {
     public void setaudioplayer(Media media){
         audioplayer = new MediaPlayer(media);
         audioplayer.setAutoPlay(true);
+
     }
 
     public void playinloop(Media pmedia) {

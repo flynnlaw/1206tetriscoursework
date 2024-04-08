@@ -140,4 +140,17 @@ public class Grid {
             }
         }
     }
+
+    public void changedisplayedpiece(GamePiece piece){
+        int[][] gridneeded = piece.getBlocks();
+        int value = piece.getValue();
+        for(int j=0;j<3;j++){
+            for(int k=0;k<3;k++){
+                if(!(gridneeded[j][k]==0)){
+                    set(j,k,value);
+                }
+            }
+        }
+    }
+
 }

@@ -1,7 +1,6 @@
 package uk.ac.soton.comp1206.scene;
 
-import javafx.animation.RotateTransition;
-import javafx.animation.TranslateTransition;
+import javafx.animation.*;
 import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
@@ -81,13 +80,16 @@ public class MenuScene extends BaseScene {
             imageView.setPreserveRatio(true);
             imageView.setFitHeight(300);
             imageView.setFitWidth(550);
-            root.getChildren().add(imageView);
-            imageView.setX(100.0);
-            RotateTransition animation = new RotateTransition();
-            animation.setNode(imageView);
-            animation.setDuration(Duration.millis(1000));
-            animation.setCycleCount(TranslateTransition.INDEFINITE);
-            animation.setByAngle(360);
+            mainPane.setCenter(imageView);
+            Timeline logorotate = new Timeline(
+                    new KeyFrame(Duration.ZERO, new KeyValue(imageView.rotateProperty(), 0)),
+                    new KeyFrame(Duration.seconds(3), new KeyValue(imageView.rotateProperty(), 10)),
+                    new KeyFrame(Duration.seconds(6), new KeyValue(imageView.rotateProperty(), 0)),
+                    new KeyFrame(Duration.seconds(9), new KeyValue(imageView.rotateProperty(), -10))
+            );
+            logorotate.setAutoReverse(true);
+            logorotate.setCycleCount(Animation.INDEFINITE);
+            logorotate.play();
         }catch(Exception e){
             logger.info("file not found");
         }
