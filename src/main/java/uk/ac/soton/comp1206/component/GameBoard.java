@@ -1,13 +1,19 @@
 package uk.ac.soton.comp1206.component;
 
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
+import javafx.util.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.ac.soton.comp1206.event.BlockClickedListener;
 import uk.ac.soton.comp1206.event.RightClickedListener;
 import uk.ac.soton.comp1206.game.Grid;
+
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
  * A GameBoard is a visual component to represent the visual GameBoard.
@@ -188,5 +194,14 @@ public class GameBoard extends GridPane {
             logger.info("clck");
         }
     }
+
+    public void fadeOut(Set<Pair<Integer, Integer>> blockstodelete) {
+        for(Pair<Integer, Integer> block :blockstodelete){
+            getBlock(block.getKey(),block.getValue()).fadeOut();
+        }
+
+
+    }
+
 
 }

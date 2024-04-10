@@ -2,21 +2,25 @@ package uk.ac.soton.comp1206.game;
 
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.media.Media;
+import javafx.scene.shape.Line;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.ac.soton.comp1206.component.GameBlock;
+import uk.ac.soton.comp1206.event.LineClearedListener;
 import uk.ac.soton.comp1206.event.NextPieceListener;
 import uk.ac.soton.comp1206.ui.Multimedia;
 
 import java.io.File;
 import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
+import javafx.util.Pair;
 
 /**
  * The Game class handles the main logic, state and properties of the TetrECS game. Methods to manipulate the game state
  * and to handle actions made by the player should take place inside this class.
  */
-public class Game {
+public class Game{
 
     private static final Logger logger = LogManager.getLogger(Game.class);
 
@@ -40,6 +44,8 @@ public class Game {
     protected final Grid nextpieceboard;
 
     private NextPieceListener nextPieceListener;
+
+    private LineClearedListener lineClearedListener;
 
     Multimedia multimedia = new Multimedia();
 
@@ -68,6 +74,7 @@ public class Game {
 
     Media placesound = new Media(new File(placesoundpath).toURI().toString());
     Media suiiisound = new Media(new File(suiiisoundpath).toURI().toString());
+
 
     /**
      * Create a new game with the specified rows and columns. Creates a corresponding grid model.
@@ -197,8 +204,8 @@ public class Game {
         Random randomnumber = new Random();
         int[][] blocks = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
         GamePiece newpiece = null;
-        //return newpiece.createPiece(randomnumber.nextInt(15));
-        return newpiece.createPiece(3);
+        return newpiece.createPiece(randomnumber.nextInt(15));
+        //return newpiece.createPiece(3);
     }
 
     public void nextPiece(){
@@ -213,7 +220,7 @@ public class Game {
     public void afterPiece(){
         HashSet<Integer> rowstodelete = new HashSet<>();
         HashSet<Integer> columnstodelete = new HashSet<>();
-        HashSet<SimpleIntegerProperty[][]> blocksdeleted = new HashSet<>();
+        Set<Pair<Integer, Integer>> blocksdeleted = new HashSet<>();
         int beforesize = blocksdeleted.size();
         countrows(rowstodelete);
         countcolumns(columnstodelete);
@@ -221,14 +228,14 @@ public class Game {
         for (int row: rowstodelete){
             for (int column = 0; column < 5; column++) {
                 grid.set(column,row,0);
-                blocksdeleted.add(new SimpleIntegerProperty[column][row]);
+                blocksdeleted.add(new Pair<>(column, row));
             }
             logger.info("row"+row+"deleted");
         }
         for (int column:columnstodelete){
             for (int row = 0; row < 5; row++) {
                 grid.set(column,row,0);
-                blocksdeleted.add(new SimpleIntegerProperty[column][row]);
+                blocksdeleted.add(new Pair<>(column, row));
             }
             logger.info("column"+column+"deleted");
         }
@@ -245,6 +252,9 @@ public class Game {
             multiplier.set(1);
         }
         checkempty();
+        if(lineClearedListener!=null){
+            lineClearedListener.onLineCleared(blocksdeleted);
+        }
 
 
     }
@@ -320,4 +330,12 @@ public class Game {
     public void setNextPieceListener(NextPieceListener nextPieceListener) {
         this.nextPieceListener = nextPieceListener;
     }
+
+    public void setLineClearedListener(LineClearedListener lineClearedListener) {
+        this.lineClearedListener = lineClearedListener;
+    }
+
 }
+
+
+

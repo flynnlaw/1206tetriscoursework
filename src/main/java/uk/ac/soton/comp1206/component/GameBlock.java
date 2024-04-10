@@ -1,9 +1,14 @@
 package uk.ac.soton.comp1206.component;
 
+import javafx.animation.AnimationTimer;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.effect.Light;
+import javafx.scene.effect.Lighting;
+import javafx.scene.effect.Shadow;
 import javafx.scene.paint.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -63,6 +68,8 @@ public class GameBlock extends Canvas {
      */
     private final IntegerProperty value = new SimpleIntegerProperty(0);
 
+    GraphicsContext gc = getGraphicsContext2D();
+
     /**
      * Create a new single Game Block
      * @param gameBoard the board this block belongs to
@@ -87,6 +94,20 @@ public class GameBlock extends Canvas {
 
         //When the value property is updated, call the internal updateValue method
         value.addListener(this::updateValue);
+            this.setOnMouseEntered(event -> {
+                        hover();});
+            this.setOnMouseExited(event -> {
+                exited();});
+//    this.setOnMouseEntered(
+//        event -> {
+//          paintColor(COLOURS[value.get()]);
+//          System.out.println("enetred");
+//        });
+//    this.setOnMouseExited(
+//        event -> {
+//          paintColor(COLOURS[value.get()]);
+//          System.out.println("Exited");
+//        });
     }
 
     /**
@@ -115,18 +136,18 @@ public class GameBlock extends Canvas {
     /**
      * Paint this canvas empty
      */
+
     private void paintEmpty() {
-        var gc = getGraphicsContext2D();
 
         //Clear
         gc.clearRect(0,0,width,height);
 
         //Fill
-        gc.setFill(Color.WHITE);
+        gc.setFill(Color.BLACK.deriveColor(0, 1, 1, 0.38));
         gc.fillRect(0,0, width, height);
 
         //Border
-        gc.setStroke(Color.BLACK);
+        gc.setStroke(Color.GREY);
         gc.strokeRect(0,0,width,height);
     }
 
@@ -135,19 +156,47 @@ public class GameBlock extends Canvas {
      * @param colour the colour to paint
      */
     private void paintColor(Paint colour) {
-        var gc = getGraphicsContext2D();
 
         //Clear
         gc.clearRect(0,0,width,height);
 
-        //Colour fill
-        gc.setFill(colour);
-        gc.fillRect(0,0, width, height);
+    // Colour fill
+    if (!(colour.equals(Color.TRANSPARENT))) {
+      gc.setFill(colour);
+      // gc.setFill(Color.LIGHTBLUE);
+      gc.fillRect(0, 0, width, height);
+        }else{
+        paintEmpty();
+    }
 
         //Border
-        gc.setStroke(Color.BLACK);
+        gc.setStroke(Color.GREY);
         gc.strokeRect(0,0,width,height);
     }
+
+    private void paintHoveredColor(Paint colour) {
+
+
+        //Clear
+        gc.clearRect(0,0,width,height);
+
+        // Colour fill
+        if(colour.equals(Color.TRANSPARENT)){
+            gc.setFill(Color.WHITE.deriveColor(0,1,1,0.38));
+        }else{
+      Color color = (Color) colour;
+      gc.setFill(color.deriveColor(0, 0.3, 1, 1));
+    }
+
+    //        gc.setFill(Color.LIGHTBLUE);
+    gc.fillRect(0, 0, width, height);
+
+        //Border
+        gc.setStroke(Color.GREY);
+        gc.strokeRect(0,0,width,height);
+    }
+
+
 
     /**
      * Get the column of this block
@@ -181,4 +230,52 @@ public class GameBlock extends Canvas {
         value.bind(input);
     }
 
-}
+    public void hover(){
+        paintHoveredColor(COLOURS[value.get()]);
+    }
+
+    public void exited(){
+        paintColor(COLOURS[value.get()]);
+    }
+
+    public void fadeOut() {
+
+        AnimationTimer timer = new AnimationTimer() {
+
+            private long startTime = -1;
+            private final long duration = 1000000000L; // 1 second in nanoseconds
+
+            @Override
+            public void handle(long now) {
+                if (startTime < 0) {
+                    startTime = now;
+                }
+
+                long elapsed = now - startTime;
+                if (elapsed >= duration) {
+                    stop(); // Stop the animation when duration is reached
+                } else {
+                    double opacity = 1 - (double) elapsed / duration;
+                    gc.clearRect(0, 0, width, height);
+                    gc.setFill(Color.rgb(0, 255, 0, opacity));
+                    gc.fillRect(0, 0, width, height);
+                }
+                gc.setFill(Color.BLACK.deriveColor(0, 1, 1, 0.21));
+                gc.fillRect(0,0, width, height);
+                gc.setStroke(Color.GREY);
+                gc.strokeRect(0,0,width,height);
+            }
+        };
+        timer.start();
+    }
+
+    }
+
+
+
+
+
+
+
+
+

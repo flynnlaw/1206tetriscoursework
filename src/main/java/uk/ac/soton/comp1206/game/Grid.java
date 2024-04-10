@@ -2,6 +2,7 @@ package uk.ac.soton.comp1206.game;
 
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import uk.ac.soton.comp1206.component.GameBlock;
 
 /**
  * The Grid is a model which holds the state of a game board. It is made up of a set of Integer values arranged in a 2D
@@ -152,5 +153,9 @@ public class Grid {
             }
         }
     }
+//    public void drawrotationcircle(GameBlock gameblock){
+//        gameblock.paintrotationcircle();
+//    }
+
 
 }

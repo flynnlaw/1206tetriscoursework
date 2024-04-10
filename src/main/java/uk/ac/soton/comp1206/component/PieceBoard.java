@@ -47,6 +47,9 @@ public class PieceBoard extends GameBoard{
                 }
             }
         }
+        GameBlock middle = getBlock(1,1);
+
+
     }
 
     public void emptygrid(){
@@ -56,6 +59,8 @@ public class PieceBoard extends GameBoard{
             }
         }
     }
+
+
 
 
 

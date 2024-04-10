@@ -1,17 +1,19 @@
 package uk.ac.soton.comp1206.scene;
 
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.event.EventHandler;
-import javafx.scene.control.Button;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.media.Media;
 import javafx.scene.text.Text;
+import javafx.util.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.ac.soton.comp1206.component.GameBlock;
 import uk.ac.soton.comp1206.component.GameBoard;
 import uk.ac.soton.comp1206.component.PieceBoard;
+import uk.ac.soton.comp1206.event.LineClearedListener;
 import uk.ac.soton.comp1206.event.NextPieceListener;
 import uk.ac.soton.comp1206.event.RightClickedListener;
 import uk.ac.soton.comp1206.game.Game;
@@ -21,11 +23,13 @@ import uk.ac.soton.comp1206.ui.GameWindow;
 import uk.ac.soton.comp1206.ui.Multimedia;
 
 import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * The Single Player challenge scene. Holds the UI for the single player challenge mode in the game.
  */
-public class ChallengeScene extends BaseScene implements NextPieceListener, RightClickedListener {
+public class ChallengeScene extends BaseScene implements NextPieceListener, RightClickedListener, LineClearedListener {
 
     private static final Logger logger = LogManager.getLogger(MenuScene.class);
     protected Game game;
@@ -33,6 +37,8 @@ public class ChallengeScene extends BaseScene implements NextPieceListener, Righ
 
     private PieceBoard pieceboard;
     private PieceBoard nextpieceboard;
+
+    private GameBoard board;
 
 
 
@@ -54,13 +60,17 @@ public class ChallengeScene extends BaseScene implements NextPieceListener, Righ
         logger.info("Building " + this.getClass().getName());
 
         setupGame();
-        var board = new GameBoard(game.getGrid(),gameWindow.getWidth()/2,gameWindow.getWidth()/2);
-        pieceboard = new PieceBoard(game.getPieceboard(), gameWindow.getWidth()/4, gameWindow.getHeight()/4);
-        nextpieceboard = new PieceBoard(game.getnextpieceboard(), gameWindow.getWidth()/6, gameWindow.getHeight()/6);
+        board = new GameBoard(game.getGrid(),gameWindow.getWidth()/2,gameWindow.getWidth()/2);
+        pieceboard = new PieceBoard(game.getPieceboard(), gameWindow.getWidth()/4, gameWindow.getWidth()/4);
+        nextpieceboard = new PieceBoard(game.getnextpieceboard(), gameWindow.getWidth()/6, gameWindow.getWidth()/6);
 
         game.setNextPieceListener(this);
+        game.setLineClearedListener(this);
         pieceboard.setOnRightClicked(this);
         nextpieceboard.setOnMouseClicked(event -> game.swapcurrentpiece());
+
+
+
 
 
 
@@ -80,6 +90,7 @@ public class ChallengeScene extends BaseScene implements NextPieceListener, Righ
         var mainPane = new BorderPane();
         challengePane.getChildren().add(mainPane);
         VBox vbox = new VBox();
+        VBox scorevbox = new VBox();
         mainPane.setRight(vbox);
         var score = new Text();
         var scoreLabel = new Text("Score");
@@ -91,13 +102,14 @@ public class ChallengeScene extends BaseScene implements NextPieceListener, Righ
         multiplier.textProperty().bind(game.getMultiplier().asString());
         level.textProperty().bind(game.getLevel().asString());
         score.getStyleClass().add("score");
-        scoreLabel.getStyleClass().add("score");
+        scoreLabel.getStyleClass().add("title");
         multiplier.getStyleClass().add("score");
         multiplierLabel.getStyleClass().add("score");
         level.getStyleClass().add("score");
         levelLabel.getStyleClass().add("score");
-        vbox.getChildren().add(scoreLabel);
-        vbox.getChildren().add(score);
+        scorevbox.getChildren().add(scoreLabel);
+        scorevbox.getChildren().add(score);
+        mainPane.setTop(scorevbox);
         vbox.getChildren().add(multiplierLabel);
         vbox.getChildren().add(multiplier);
         vbox.getChildren().add(levelLabel);
@@ -169,5 +181,10 @@ public class ChallengeScene extends BaseScene implements NextPieceListener, Righ
     public void onRightClicked() {
         pieceboard.emptygrid();
         game.rotatecurrentpiece();
+    }
+
+    @Override
+    public void onLineCleared(Set<Pair<Integer, Integer>> blockstodelete) {
+        board.fadeOut(blockstodelete);
     }
 }
