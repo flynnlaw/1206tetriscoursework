@@ -94,10 +94,10 @@ public class GameBlock extends Canvas {
 
         //When the value property is updated, call the internal updateValue method
         value.addListener(this::updateValue);
-            this.setOnMouseEntered(event -> {
-                        hover();});
-            this.setOnMouseExited(event -> {
-                exited();});
+//            this.setOnMouseEntered(event -> {
+//                        hover();});
+//            this.setOnMouseExited(event -> {
+//                exited();});
 //    this.setOnMouseEntered(
 //        event -> {
 //          paintColor(COLOURS[value.get()]);
@@ -234,8 +234,7 @@ public class GameBlock extends Canvas {
         paintHoveredColor(COLOURS[value.get()]);
     }
 
-    public void exited(){
-        paintColor(COLOURS[value.get()]);
+    public void exited(){paintColor(COLOURS[value.get()]);
     }
 
     public void fadeOut() {

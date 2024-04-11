@@ -1,18 +1,28 @@
 package uk.ac.soton.comp1206.scene;
 
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.media.Media;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
+import javafx.util.Duration;
 import javafx.util.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.ac.soton.comp1206.component.GameBlock;
 import uk.ac.soton.comp1206.component.GameBoard;
 import uk.ac.soton.comp1206.component.PieceBoard;
+import uk.ac.soton.comp1206.event.GameLoopListener;
 import uk.ac.soton.comp1206.event.LineClearedListener;
 import uk.ac.soton.comp1206.event.NextPieceListener;
 import uk.ac.soton.comp1206.event.RightClickedListener;
@@ -29,7 +39,7 @@ import java.util.Set;
 /**
  * The Single Player challenge scene. Holds the UI for the single player challenge mode in the game.
  */
-public class ChallengeScene extends BaseScene implements NextPieceListener, RightClickedListener, LineClearedListener {
+public class ChallengeScene extends BaseScene implements NextPieceListener, RightClickedListener, LineClearedListener, GameLoopListener {
 
     private static final Logger logger = LogManager.getLogger(MenuScene.class);
     protected Game game;
@@ -39,6 +49,12 @@ public class ChallengeScene extends BaseScene implements NextPieceListener, Righ
     private PieceBoard nextpieceboard;
 
     private GameBoard board;
+
+    private Rectangle timerectangle;
+
+    private Timeline timeline;
+
+    BorderPane mainPane = new BorderPane();
 
 
 
@@ -66,6 +82,7 @@ public class ChallengeScene extends BaseScene implements NextPieceListener, Righ
 
         game.setNextPieceListener(this);
         game.setLineClearedListener(this);
+        game.setGameLoopListener(this);
         pieceboard.setOnRightClicked(this);
         nextpieceboard.setOnMouseClicked(event -> game.swapcurrentpiece());
 
@@ -87,41 +104,60 @@ public class ChallengeScene extends BaseScene implements NextPieceListener, Righ
         Media gamemusic = new Media(new File(pathtwo).toURI().toString());
         multimedia.playgamemusic(gamestart, gamemusic);
 
-        var mainPane = new BorderPane();
+
+
+
         challengePane.getChildren().add(mainPane);
-        VBox vbox = new VBox();
-        VBox scorevbox = new VBox();
-        mainPane.setRight(vbox);
+        VBox rightsidevbox = new VBox();
+        mainPane.setRight(rightsidevbox);
         var score = new Text();
         var scoreLabel = new Text("Score");
         var multiplier = new Text();
         var multiplierLabel = new Text("Multiplier");
         var level = new Text();
         var levelLabel = new Text("Level");
+        var lives = new Text();
+        var livesLabel = new Text("Lives");
         score.textProperty().bind(game.getScore().asString());
         multiplier.textProperty().bind(game.getMultiplier().asString());
         level.textProperty().bind(game.getLevel().asString());
+        lives.textProperty().bind(game.getLives().asString());
         score.getStyleClass().add("score");
-        scoreLabel.getStyleClass().add("title");
+        scoreLabel.getStyleClass().add("heading");
         multiplier.getStyleClass().add("score");
-        multiplierLabel.getStyleClass().add("score");
-        level.getStyleClass().add("score");
-        levelLabel.getStyleClass().add("score");
-        scorevbox.getChildren().add(scoreLabel);
-        scorevbox.getChildren().add(score);
-        mainPane.setTop(scorevbox);
-        vbox.getChildren().add(multiplierLabel);
-        vbox.getChildren().add(multiplier);
-        vbox.getChildren().add(levelLabel);
-        vbox.getChildren().add(level);
-        vbox.getChildren().add(pieceboard);
-        vbox.getChildren().add(nextpieceboard);
+        multiplierLabel.getStyleClass().add("heading");
+        level.getStyleClass().add("level");
+        levelLabel.getStyleClass().add("heading");
+        lives.getStyleClass().add("lives");
+        livesLabel.getStyleClass().add("heading");
+        VBox scorevbox = new VBox(scoreLabel,score);
+        scorevbox.setPadding(new Insets(5,0,0,5));
+        VBox informationvbox = new VBox(multiplierLabel,multiplier,levelLabel,level);
+        informationvbox.setAlignment(Pos.BOTTOM_CENTER);
+        VBox pieceboardvbox = new VBox(pieceboard,nextpieceboard);
+        pieceboardvbox.setAlignment(Pos.CENTER);
+        pieceboard.setPadding(new Insets(0,10,10,0));
+        nextpieceboard.setPadding(new Insets(0,10,10,0));
+        VBox livesvbox = new VBox(livesLabel,lives);
+        HBox tophbox = new HBox(scorevbox,livesvbox);
+        tophbox.prefHeight(60);
+        livesvbox.setPadding(new Insets(5,5,0,0));
+        livesvbox.setPrefWidth(800);
+        livesvbox.setPrefHeight(60);
+        livesvbox.setAlignment(Pos.TOP_RIGHT);
+        mainPane.setTop(tophbox);
+
+
+
+        rightsidevbox.getChildren().addAll(informationvbox,pieceboardvbox);
         mainPane.setCenter(board);
 
 
 
         //Handle block on gameboard grid being clicked
         board.setOnBlockClick(this::blockClicked);
+
+
     }
 
     /**
@@ -158,6 +194,7 @@ public class ChallengeScene extends BaseScene implements NextPieceListener, Righ
                             gameWindow.cleanup();
                             multimedia.stopmusicplayer();
                             gameWindow.startMenu();
+                            game.stoptimer();
                         }
                     }
                 });
@@ -187,4 +224,34 @@ public class ChallengeScene extends BaseScene implements NextPieceListener, Righ
     public void onLineCleared(Set<Pair<Integer, Integer>> blockstodelete) {
         board.fadeOut(blockstodelete);
     }
+
+    @Override
+    public void timerstarted(int delay) {
+            // Configure timer rectangle and timeline
+        this.timerectangle = new Rectangle();
+            timerectangle.setWidth(800);
+            timerectangle.setHeight(22);
+            timerectangle.setFill(Color.GREEN);
+            timerectangle.setStroke(Color.BLACK);
+            this.timeline = new Timeline();
+
+            timeline.getKeyFrames().clear(); // Clear previous keyframes if any
+            timeline.getKeyFrames().addAll(
+                    new KeyFrame(Duration.ZERO, new KeyValue(timerectangle.widthProperty(), 800)),
+                    new KeyFrame(Duration.millis(delay), new KeyValue(timerectangle.widthProperty(), 0))
+            );
+            timeline.setCycleCount(Animation.INDEFINITE);
+        mainPane.setBottom(timerectangle);
+            timeline.play();
+
+    }
+
+    @Override
+    public void timerstopped() {
+        timeline.stop();
+        timerectangle.setWidth(200);
+        timerectangle.setFill(Color.GREEN);
+        timeline.play();
+    }
+
 }

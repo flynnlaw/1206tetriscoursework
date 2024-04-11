@@ -13,8 +13,12 @@ import java.util.Random;
 
 public class PieceBoard extends GameBoard{
 
+    private static final Logger logger = LogManager.getLogger(PieceBoard.class);
+
+
     public PieceBoard(Grid grid, double width, double height) {
         super(grid, width, height);
+
     }
 
     public PieceBoard(Grid grid, double width, double height, int value){
@@ -59,6 +63,29 @@ public class PieceBoard extends GameBoard{
             }
         }
     }
+
+    protected GameBlock createBlock(int x, int y) {
+        var blockWidth = getgameboardwidth() / getCols();
+        var blockHeight = getgameboardheight() / getRows();
+
+        //Create a new GameBlock UI component
+        GameBlock block = new GameBlock(this, x, y, blockWidth, blockHeight);
+
+        //Add to the GridPane
+        add(block,x,y);
+
+        //Add to our block directory
+        blocks[x][y] = block;
+
+        //Link the GameBlock component to the corresponding value in the Grid
+        block.bind(grid.getGridProperty(x,y));
+
+        //Add a mouse click handler to the block to trigger GameBoard blockClicked method
+        block.setOnMouseClicked((e) -> blockClicked(e, block));
+
+        return block;
+    }
+
 
 
 

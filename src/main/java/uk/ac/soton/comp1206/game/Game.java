@@ -6,14 +6,14 @@ import javafx.scene.shape.Line;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.ac.soton.comp1206.component.GameBlock;
+import uk.ac.soton.comp1206.event.GameLoopListener;
 import uk.ac.soton.comp1206.event.LineClearedListener;
 import uk.ac.soton.comp1206.event.NextPieceListener;
 import uk.ac.soton.comp1206.ui.Multimedia;
 
+import java.util.*;
 import java.io.File;
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
+
 import javafx.util.Pair;
 
 /**
@@ -47,6 +47,8 @@ public class Game{
 
     private LineClearedListener lineClearedListener;
 
+    private GameLoopListener gameLoopListener;
+
     Multimedia multimedia = new Multimedia();
 
 
@@ -75,6 +77,7 @@ public class Game{
     Media placesound = new Media(new File(placesoundpath).toURI().toString());
     Media suiiisound = new Media(new File(suiiisoundpath).toURI().toString());
 
+   private Timer timer;
 
     /**
      * Create a new game with the specified rows and columns. Creates a corresponding grid model.
@@ -107,6 +110,13 @@ public class Game{
         currentPiece = spawnPiece();
         followingPiece = spawnPiece();
         updatepieceboard(currentPiece);
+        nextPieceListener.followingpiece(followingPiece);
+        starttimer();
+        if (gameLoopListener != null) {
+            gameLoopListener.timerstarted(getTimerDelay());
+            logger.info("timer started");
+        }
+        logger.info("timer started");
     }
 
     /**
@@ -132,6 +142,8 @@ public class Game{
             nextPiece();
             afterPiece();
             updatepieceboard(currentPiece);
+            stoptimer();
+            starttimer();
         }else{
             multimedia.setaudioplayer(failsound);
         }
@@ -216,6 +228,7 @@ public class Game{
             nextPieceListener.followingpiece(followingPiece);
         }
     }
+
 
     public void afterPiece(){
         HashSet<Integer> rowstodelete = new HashSet<>();
@@ -334,6 +347,58 @@ public class Game{
     public void setLineClearedListener(LineClearedListener lineClearedListener) {
         this.lineClearedListener = lineClearedListener;
     }
+
+    public void setGameLoopListener(GameLoopListener gameLoopListener) {
+        this.gameLoopListener = gameLoopListener;
+    }
+
+    public int getTimerDelay(){
+        int delay = 12000-(500*level.getValue());
+        if (delay < 2500){
+            delay = 2500;
+        }
+        return delay;
+    }
+
+    public void starttimer(){
+        timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                logger.info("timer out");
+                gameLoop();
+            }
+        },getTimerDelay(),1);
+    }
+
+    public void stoptimer() {
+        if (timer != null) {
+            timer.cancel();
+            timer.purge();
+        }
+        if (gameLoopListener != null) {
+            gameLoopListener.timerstopped();
+            logger.info("timer reset");
+        }
+    }
+
+    public void gameLoop(){
+        if(lives.get()-1 < 0){
+            lives.set(0);
+        }else{
+            lives.set(lives.get()-1);
+        }
+        multiplier.set(1);
+        nextPiece();
+        if (gameLoopListener != null) {
+            gameLoopListener.timerstopped();
+            logger.info("timer stop");
+        }
+        stoptimer();
+        starttimer();
+    }
+
+
 
 }
 

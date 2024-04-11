@@ -32,22 +32,22 @@ public class GameBoard extends GridPane {
     /**
      * Number of columns in the board
      */
-    private final int cols;
+    protected final int cols;
 
     /**
      * Number of rows in the board
      */
-    private final int rows;
+    protected final int rows;
 
     /**
      * The visual width of the board - has to be specified due to being a Canvas
      */
-    private final double width;
+    protected final double width;
 
     /**
      * The visual height of the board - has to be specified due to being a Canvas
      */
-    private final double height;
+    protected final double height;
 
     /**
      * The grid this GameBoard represents
@@ -65,6 +65,8 @@ public class GameBoard extends GridPane {
     private BlockClickedListener blockClickedListener;
 
     private RightClickedListener rightClickedListener;
+
+    protected boolean hover;
 
 
     /**
@@ -159,6 +161,8 @@ public class GameBoard extends GridPane {
 
         //Add a mouse click handler to the block to trigger GameBoard blockClicked method
         block.setOnMouseClicked((e) -> blockClicked(e, block));
+        block.setOnMouseEntered(mouseEvent -> block.hover());
+        block.setOnMouseExited(mouseEvent -> block.exited());
 
         return block;
     }
@@ -176,7 +180,7 @@ public class GameBoard extends GridPane {
      * @param event mouse event
      * @param block block clicked on
      */
-    private void blockClicked(MouseEvent event, GameBlock block) {
+    protected void blockClicked(MouseEvent event, GameBlock block) {
         logger.info("Block clicked: {}", block);
 
         if(blockClickedListener != null) {
@@ -203,5 +207,10 @@ public class GameBoard extends GridPane {
 
     }
 
+    public double getCols(){return cols;}
+    public double getRows(){return rows;}
+    public double getgameboardwidth(){return width;}
+
+    public double getgameboardheight(){return height;}
 
 }
