@@ -53,6 +53,7 @@ public class MenuScene extends BaseScene {
 
 
         String path = "src/main/resources/music/menu.mp3";
+        String path1 = "src/main/resources/music/suiiianthem.mp3";
         Media backgroundmusic = new Media(new File(path).toURI().toString());
         logger.info("playing background music");
         multimedia.playmenumusic(backgroundmusic);

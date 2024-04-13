@@ -113,10 +113,8 @@ public class Game{
         nextPieceListener.followingpiece(followingPiece);
         starttimer();
         if (gameLoopListener != null) {
-            gameLoopListener.timerstarted(getTimerDelay());
-            logger.info("timer started");
+            gameLoopListener.timercreated(getTimerDelay());
         }
-        logger.info("timer started");
     }
 
     /**
@@ -144,6 +142,7 @@ public class Game{
             updatepieceboard(currentPiece);
             stoptimer();
             starttimer();
+            gameLoopListener.timerstopped(getTimerDelay());
         }else{
             multimedia.setaudioplayer(failsound);
         }
@@ -217,7 +216,7 @@ public class Game{
         int[][] blocks = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
         GamePiece newpiece = null;
         return newpiece.createPiece(randomnumber.nextInt(15));
-        //return newpiece.createPiece(3);
+        //return newpiece.createPiece(0);
     }
 
     public void nextPiece(){
@@ -365,7 +364,6 @@ public class Game{
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                logger.info("timer out");
                 gameLoop();
             }
         },getTimerDelay(),1);
@@ -375,10 +373,6 @@ public class Game{
         if (timer != null) {
             timer.cancel();
             timer.purge();
-        }
-        if (gameLoopListener != null) {
-            gameLoopListener.timerstopped();
-            logger.info("timer reset");
         }
     }
 
@@ -391,8 +385,7 @@ public class Game{
         multiplier.set(1);
         nextPiece();
         if (gameLoopListener != null) {
-            gameLoopListener.timerstopped();
-            logger.info("timer stop");
+            gameLoopListener.timerstopped(getTimerDelay());
         }
         stoptimer();
         starttimer();

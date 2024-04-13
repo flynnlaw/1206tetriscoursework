@@ -1,9 +1,6 @@
 package uk.ac.soton.comp1206.scene;
 
-import javafx.animation.Animation;
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.Timeline;
+import javafx.animation.*;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -13,6 +10,9 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.media.Media;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.LinearGradient;
+import javafx.scene.paint.Stop;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
@@ -52,9 +52,11 @@ public class ChallengeScene extends BaseScene implements NextPieceListener, Righ
 
     private Rectangle timerectangle;
 
-    private Timeline timeline;
+    private Timeline timeline = new Timeline();
 
     BorderPane mainPane = new BorderPane();
+
+    FillTransition fillTransition = new FillTransition();
 
 
 
@@ -227,31 +229,47 @@ public class ChallengeScene extends BaseScene implements NextPieceListener, Righ
 
     @Override
     public void timerstarted(int delay) {
+        logger.info("new timer started");
             // Configure timer rectangle and timeline
-        this.timerectangle = new Rectangle();
             timerectangle.setWidth(800);
             timerectangle.setHeight(22);
-            timerectangle.setFill(Color.GREEN);
-            timerectangle.setStroke(Color.BLACK);
-            this.timeline = new Timeline();
-
-            timeline.getKeyFrames().clear(); // Clear previous keyframes if any
+            timeline.getKeyFrames().clear();
             timeline.getKeyFrames().addAll(
-                    new KeyFrame(Duration.ZERO, new KeyValue(timerectangle.widthProperty(), 800)),
-                    new KeyFrame(Duration.millis(delay), new KeyValue(timerectangle.widthProperty(), 0))
+                new KeyFrame(Duration.ZERO, new KeyValue(timerectangle.widthProperty(), 800)),
+                new KeyFrame(Duration.millis(delay), new KeyValue(timerectangle.widthProperty(), 0))
             );
+            timerectangle.setStroke(Color.BLACK);
             timeline.setCycleCount(Animation.INDEFINITE);
         mainPane.setBottom(timerectangle);
             timeline.play();
+            fillTransition.play();
+
 
     }
 
     @Override
-    public void timerstopped() {
+    public void timerstopped(int delay) {
+        logger.info("timer stopped");
         timeline.stop();
-        timerectangle.setWidth(200);
-        timerectangle.setFill(Color.GREEN);
-        timeline.play();
+        fillTransition.pause();
+        fillTransition.playFromStart();
+        timerstarted(delay);
+    }
+
+    @Override
+    public void timercreated(int delay) {
+        this.timerectangle = new Rectangle();
+        timeline.getKeyFrames().clear();
+        timeline.getKeyFrames().addAll(
+                new KeyFrame(Duration.ZERO, new KeyValue(timerectangle.widthProperty(), 800)),
+                new KeyFrame(Duration.millis(delay), new KeyValue(timerectangle.widthProperty(), 0))
+        );
+        fillTransition.setDuration(Duration.millis(delay));
+        fillTransition.setShape(timerectangle);
+        fillTransition.setFromValue(Color.GREEN);
+        fillTransition.setToValue(Color.RED);
+        fillTransition.setAutoReverse(false); // Don't reverse the animation
+        timerstarted(delay);
     }
 
 }
