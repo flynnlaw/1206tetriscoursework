@@ -1,5 +1,6 @@
 package uk.ac.soton.comp1206.game;
 
+import javafx.application.Platform;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.media.Media;
 import javafx.scene.shape.Line;
@@ -54,7 +55,7 @@ public class Game{
 
     SimpleIntegerProperty score = new SimpleIntegerProperty(0);
     SimpleIntegerProperty level = new SimpleIntegerProperty(0);
-    SimpleIntegerProperty lives = new SimpleIntegerProperty(3);
+    SimpleIntegerProperty lives = new SimpleIntegerProperty(0);
     SimpleIntegerProperty multiplier = new SimpleIntegerProperty(1);
 
     GamePiece currentPiece;
@@ -378,17 +379,20 @@ public class Game{
 
     public void gameLoop(){
         if(lives.get()-1 < 0){
-            lives.set(0);
+            stoptimer();
+            Platform.runLater(() -> {
+                gameLoopListener.gameended(this);
+            });
         }else{
             lives.set(lives.get()-1);
+            multiplier.set(1);
+            nextPiece();
+            if (gameLoopListener != null) {
+                gameLoopListener.timerstopped(getTimerDelay());
+            }
+            stoptimer();
+            starttimer();
         }
-        multiplier.set(1);
-        nextPiece();
-        if (gameLoopListener != null) {
-            gameLoopListener.timerstopped(getTimerDelay());
-        }
-        stoptimer();
-        starttimer();
     }
 
 

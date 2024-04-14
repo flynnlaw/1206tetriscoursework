@@ -272,4 +272,11 @@ public class ChallengeScene extends BaseScene implements NextPieceListener, Righ
         timerstarted(delay);
     }
 
+    @Override
+    public void gameended(Game game) {
+        logger.info("game ended");
+        timeline.stop();
+        gameWindow.startscores(game);
+    }
+
 }
