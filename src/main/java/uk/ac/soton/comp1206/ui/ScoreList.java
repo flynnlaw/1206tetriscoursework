@@ -30,22 +30,33 @@ public class ScoreList extends VBox {
             Color.rgb(74,65,42)
     };
     private ObservableList<Pair<String, Integer>> scores;
+
+    private List<Pair<String, Integer>> scoreslist;
     SimpleListProperty scoresProperty;
 
-    public ScoreList(List<Pair<String, Integer>> scoresList) {
+    public ScoreList(List<Pair<String, Integer>> scoresList, String localoronline) {
         scores = FXCollections.observableArrayList(scoresList);
         scoresProperty = new SimpleListProperty<>(scores);
-        setScoresProperty();
+        setScoresProperty(localoronline);
+        this.scoreslist = scoresList;
+
     }
 
-    public void setScoresProperty(){
+    public void setScoresProperty(String localoronline){
+        Label scorelabel;
         int colour = 0;
-        Label scorelabel = new Label("Local Scores");
+    if (localoronline.equals("local")) {
+      scorelabel = new Label("Local Scores");
+        }
+    else{
+        scorelabel = new Label("Online Scores");
+    }
         scorelabel.getStyleClass().add("heading");
         getChildren().add(scorelabel);
         for (Pair<String, Integer> score : scores) {
             Label label = new Label(score.getKey() + ": " + score.getValue());
             label.getStyleClass().add("scorelist");
+            label.setWrapText(true);
             label.setTextFill(COLOURS[colour]);
             getChildren().add(label);
             colour++;
@@ -63,6 +74,7 @@ public class ScoreList extends VBox {
         Pair<String, Integer> score = scoresList.get(i);
       Label label = new Label(score.getKey() + ": " + score.getValue());
       label.getStyleClass().add("scorelist");
+      label.setWrapText(true);
       label.setTextFill(COLOURS[colour]);
       getChildren().add(label);
       colour++;
@@ -82,5 +94,7 @@ public class ScoreList extends VBox {
         }
         return transition;
     }
+
+    public List<Pair<String, Integer>> getScoreslist(){return this.scoreslist;}
 
 }

@@ -1,15 +1,11 @@
 package uk.ac.soton.comp1206.scene;
 
 import javafx.animation.*;
-import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
-import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -20,9 +16,9 @@ import javafx.util.Duration;
 import javafx.util.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import uk.ac.soton.comp1206.component.PieceBoard;
+import uk.ac.soton.comp1206.event.CommunicationsListener;
 import uk.ac.soton.comp1206.game.Game;
-import uk.ac.soton.comp1206.game.Grid;
+import uk.ac.soton.comp1206.network.Communicator;
 import uk.ac.soton.comp1206.ui.GamePane;
 import uk.ac.soton.comp1206.ui.GameWindow;
 import uk.ac.soton.comp1206.ui.ScoreList;
@@ -37,10 +33,16 @@ public class ScoresScene extends BaseScene{
     private static final Logger logger = LogManager.getLogger(ScoresScene.class);
 
     private final List<Pair<String, Integer>> scoresList = new ArrayList<>();
+    private final List<Pair<String,Integer>> onlinescorelist = new ArrayList<>();
+
+
+    Communicator communicator = gameWindow.getCommunicator();
 
     TextField field;
 
     ScoreList scoredisplay;
+
+    ScoreList onlinescoredisplay;
 
     Game gamestate;
     public ScoresScene(GameWindow gameWindow, Game game) {
@@ -51,6 +53,7 @@ public class ScoresScene extends BaseScene{
 
     @Override
     public void build() {
+        loadOnlineScores();
         logger.info("Building " + this.getClass().getName());
         root = new GamePane(gameWindow.getWidth(), gameWindow.getHeight());
         var menuPane = new StackPane();
@@ -61,8 +64,7 @@ public class ScoresScene extends BaseScene{
         var mainPane = new BorderPane();
         menuPane.getChildren().add(mainPane);
         List<Pair<String,Integer>> scores = loadScores();
-        scoredisplay = new ScoreList(scores);
-        ScoreList scoredisplaytwo = new ScoreList(scores);
+        scoredisplay = new ScoreList(scores,"local");
         try{
             VBox topvbox = new VBox();
             Image tetrecsimage = new Image(new FileInputStream("src/main/resources/images/TetrECS.png"));
@@ -78,13 +80,15 @@ public class ScoresScene extends BaseScene{
             field.setPrefSize(600,20);
             bottomhbox.setPrefSize(600,225);
             scoredisplay.setPrefSize(300,225);
+            scoredisplay.setMinSize(300,225);
             scoredisplay.setAlignment(Pos.CENTER_RIGHT);
-            scoredisplaytwo.setPrefSize(300,225);
-            scoredisplaytwo.setAlignment(Pos.CENTER_RIGHT);
+            scoredisplay.setMargin(scoredisplay, new Insets(200,200,200,200));
+            onlinescoredisplay.setPrefSize(300,225);
+            onlinescoredisplay.setAlignment(Pos.CENTER_RIGHT);
             mainPane.setCenter(topvbox);
             FlowPane flowpane = new FlowPane(bottomhbox);
             mainPane.setBottom(flowpane);
-            bottomhbox.getChildren().addAll(scoredisplay,scoredisplaytwo);
+            bottomhbox.getChildren().addAll(scoredisplay,onlinescoredisplay);
             SequentialTransition sequentialTransition = new SequentialTransition();
             Button button = new Button("Submit");
             topvbox.getChildren().addAll(imageView,field,button);
@@ -93,37 +97,54 @@ public class ScoresScene extends BaseScene{
             Duration duration = Duration.seconds(0.2);
 
             // Add FadeTransition for each child node
+            ParallelTransition parallelTransition = new ParallelTransition();
+
+// Add FadeTransitions for each child node in score display one
             for (int i = 1; i < scoredisplay.getChildren().size(); i++) {
-                FadeTransition fadeTransition = new FadeTransition(duration, scoredisplay.getChildren().get(i));
+                FadeTransition fadeTransition = new FadeTransition(Duration.seconds(0.2), scoredisplay.getChildren().get(i));
                 fadeTransition.setFromValue(0);
                 fadeTransition.setToValue(1);
                 fadeTransition.setCycleCount(1);
-                fadeTransition.setDelay(Duration.seconds(0.1)); // Delay each transition by i seconds
-                sequentialTransition.getChildren().add(fadeTransition);
+                fadeTransition.setDelay(Duration.seconds(0.1 * i));
+                parallelTransition.getChildren().add(fadeTransition);
             }
+
+// Add FadeTransitions for each child node in score display two
+            for (int i = 1; i < onlinescoredisplay.getChildren().size(); i++) {
+                FadeTransition fadeTransition = new FadeTransition(Duration.seconds(0.2), onlinescoredisplay.getChildren().get(i));
+                fadeTransition.setFromValue(0);
+                fadeTransition.setToValue(1);
+                fadeTransition.setCycleCount(1);
+                fadeTransition.setDelay(Duration.seconds(0.1 * i));
+                parallelTransition.getChildren().add(fadeTransition);
+            }
+
             field.setVisible(false);
             button.setVisible(false);
-            if(gamestate.getScore().get()>getMinimumScore()){
+            if(gamestate.getScore().get()>getMinimumScore() || gamestate.getScore().get()>getMinimumOnlineScore()){
                 field.setVisible(true);
                 button.setVisible(true);
                 scoredisplay.setVisible(false);
-                scoredisplaytwo.setVisible(false);
+                onlinescoredisplay.setVisible(false);
 
                 button.setOnAction(actionEvent -> {
-                    addtoscores();
+                    addtoscores("local");
+                    if(gamestate.getScore().get()>getMinimumOnlineScore()){
+                        writeonlinescore(gamestate.getScore().getValue());
+                    }
                     button.setVisible(false);
                     field.setVisible(false);
                     scoredisplay.setVisible(true);
-                    scoredisplaytwo.setVisible(true);
+                    onlinescoredisplay.setVisible(true);
 
-                    ParallelTransition parallelTransition = new ParallelTransition();
-                    parallelTransition.getChildren().addAll(scoredisplay.getParallelTransition().getChildren());
-                    parallelTransition.getChildren().addAll(scoredisplaytwo.getParallelTransition().getChildren());
-                    parallelTransition.play();
+                    ParallelTransition parallelTransitionifbuttonispressed = new ParallelTransition();
+                    parallelTransitionifbuttonispressed.getChildren().addAll(scoredisplay.getParallelTransition().getChildren());
+                    parallelTransitionifbuttonispressed.getChildren().addAll(onlinescoredisplay.getParallelTransition().getChildren());
+                    parallelTransitionifbuttonispressed.play();
                     writeScores(scoresList);
                 });
             }else{
-                sequentialTransition.play();
+                parallelTransition.play();
             }
 
 
@@ -174,15 +195,56 @@ public class ScoresScene extends BaseScene{
         return scoresList.get(scoresList.size()-1).getValue();
     }
 
-    public void addtoscores(){
-        changescores(field.getText());
+    public int getMinimumOnlineScore(){
+        return onlinescoredisplay.getScoreslist().get(9).getValue();
     }
 
-    public void changescores(String name){
-        scoresList.add(new Pair<>(name, gamestate.getScore().get()));
-        scoresList.sort(Comparator.comparing(Pair::getValue));
-        scoresList.remove(scoresList.get(0));
-        scoredisplay.changelist(scoresList);
+
+    public void addtoscores(String localoronline){
+        changescores(field.getText(),localoronline);
+    }
+
+    public void changescores(String name, String localoronline){
+        if(localoronline.equals("local")){
+      scoresList.add(new Pair<>(name, gamestate.getScore().get()));
+      scoresList.sort(Comparator.comparing(Pair::getValue));
+      scoresList.remove(scoresList.get(0));
+      scoredisplay.changelist(scoresList);
+    }
+        else{
+            onlinescorelist.add(new Pair<>(name, gamestate.getScore().get()));
+            onlinescorelist.sort(Comparator.comparing(Pair::getValue));
+            onlinescorelist.remove(onlinescorelist.get(0));
+            onlinescoredisplay.changelist(onlinescorelist);
+        }
+    }
+
+    public void loadOnlineScores(){
+        communicator.send("HISCORES DEFAULT");
+        communicator.addListener(new CommunicationsListener() {
+            @Override
+            public void receiveCommunication(String communication) {
+                String[] lines = communication.split("\\n");
+                lines[0] = lines[0].replaceAll("HISCORES ","");
+                for(String highscore: lines){
+                    String[] parts = highscore.split(":");
+                    Pair<String,Integer> toadd = new Pair<>(parts[0],Integer.parseInt(parts[1].trim()));
+                    onlinescorelist.add(toadd);
+                }
+                setonlinescoredisplay(onlinescorelist);
+
+            }
+        });
+    }
+
+    public void setonlinescoredisplay(List<Pair<String,Integer>> list){
+        onlinescoredisplay = new ScoreList(list,"online");
+    }
+
+    public void writeonlinescore(int score){
+        String name = field.getText();
+        communicator.send("HISCORE <"+name+">:<"+score+">");
+        addtoscores("online");
     }
 
 
