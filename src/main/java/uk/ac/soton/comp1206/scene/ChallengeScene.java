@@ -1,7 +1,6 @@
 package uk.ac.soton.comp1206.scene;
 
 import javafx.animation.*;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -10,9 +9,6 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.media.Media;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.CycleMethod;
-import javafx.scene.paint.LinearGradient;
-import javafx.scene.paint.Stop;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
@@ -32,8 +28,10 @@ import uk.ac.soton.comp1206.ui.GamePane;
 import uk.ac.soton.comp1206.ui.GameWindow;
 import uk.ac.soton.comp1206.ui.Multimedia;
 
+import java.io.BufferedReader;
 import java.io.File;
-import java.util.HashSet;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Set;
 
 /**
@@ -114,27 +112,26 @@ public class ChallengeScene extends BaseScene implements NextPieceListener, Righ
         mainPane.setRight(rightsidevbox);
         var score = new Text();
         var scoreLabel = new Text("Score");
-        var multiplier = new Text();
-        var multiplierLabel = new Text("Multiplier");
+        var highscore = new Text();
+        var highscoreLabel = new Text("High Score");
         var level = new Text();
         var levelLabel = new Text("Level");
         var lives = new Text();
         var livesLabel = new Text("Lives");
         score.textProperty().bind(game.getScore().asString());
-        multiplier.textProperty().bind(game.getMultiplier().asString());
         level.textProperty().bind(game.getLevel().asString());
         lives.textProperty().bind(game.getLives().asString());
         score.getStyleClass().add("score");
         scoreLabel.getStyleClass().add("heading");
-        multiplier.getStyleClass().add("score");
-        multiplierLabel.getStyleClass().add("heading");
+        highscore.getStyleClass().add("score");
+        highscoreLabel.getStyleClass().add("heading");
         level.getStyleClass().add("level");
         levelLabel.getStyleClass().add("heading");
         lives.getStyleClass().add("lives");
         livesLabel.getStyleClass().add("heading");
         VBox scorevbox = new VBox(scoreLabel,score);
         scorevbox.setPadding(new Insets(5,0,0,5));
-        VBox informationvbox = new VBox(multiplierLabel,multiplier,levelLabel,level);
+        VBox informationvbox = new VBox(highscoreLabel,highscore,levelLabel,level);
         informationvbox.setAlignment(Pos.BOTTOM_CENTER);
         VBox pieceboardvbox = new VBox(pieceboard,nextpieceboard);
         pieceboardvbox.setAlignment(Pos.CENTER);
@@ -148,6 +145,13 @@ public class ChallengeScene extends BaseScene implements NextPieceListener, Righ
         livesvbox.setPrefHeight(60);
         livesvbox.setAlignment(Pos.TOP_RIGHT);
         mainPane.setTop(tophbox);
+
+        if (!(getHighScore()>game.getScore().getValue())){
+            highscore.textProperty().bind(game.getScore().asString());
+        }
+        else{
+            highscore.setText(String.valueOf(getHighScore()));
+        }
 
 
 
@@ -278,5 +282,21 @@ public class ChallengeScene extends BaseScene implements NextPieceListener, Righ
         timeline.stop();
         gameWindow.startscores(game);
     }
+
+    public int getHighScore() {
+        try (BufferedReader reader = new BufferedReader(new FileReader("src/main/resources/localscores.txt"))) {
+            String line = reader.readLine();
+            if (line != null) {
+                String[] parts = line.split(":");
+                if (parts.length == 2) {
+                    return Integer.parseInt(parts[1].trim());
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return 0; // Default value if file is empty or an error occurs
+    }
+
 
 }
