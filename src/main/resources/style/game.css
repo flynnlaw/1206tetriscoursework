@@ -53,7 +53,6 @@
     -fx-font-family: 'Orbitron';
     -fx-font-size: 32px;
     -fx-font-weight: 900;
-    -fx-border-color: black;
     -fx-stroke: black;
     -fx-effect: dropshadow(gaussian, black, 1, 1.0, 1, 1);
 }
@@ -63,7 +62,15 @@
     -fx-font-family: 'Orbitron';
     -fx-font-size: 20px;
     -fx-font-weight: 700;
-    -fx-border-color: black;
+    -fx-stroke: black;
+    -fx-effect: dropshadow(gaussian, black, 1, 1.0, 1, 1);
+}
+
+.smallheading {
+    -fx-fill: white;
+    -fx-font-family: 'Orbitron';
+    -fx-font-size: 15px;
+    -fx-font-weight: 700;
     -fx-stroke: black;
     -fx-effect: dropshadow(gaussian, black, 1, 1.0, 1, 1);
 }
@@ -145,8 +152,6 @@
     -fx-font-family: 'Orbitron';
     -fx-font-size: 16px;
     -fx-font-weight: 700;
-    -fx-border-color: black;
-    -fx-stroke: black;
 }
 .channelItem.selected {
     -fx-fill: yellow;
@@ -165,10 +170,18 @@
 
 .scroller {
     -fx-background-color: transparent;
+    -fx-background-color: rgba(0, 0, 0, 0);
 }
 
 .scroller .viewport {
     -fx-background-color: transparent;
+}
+
+.chatwindow {
+    -fx-background-color: transparent;
+    -fx-border-width: 1;
+    -fx-border-color: white;
+    -fx-background-color: rgba(0, 0, 0, 0.6);
 }
 
 .messages {
@@ -179,6 +192,19 @@
 
 .messages Text {
     -fx-fill: white;
+}
+
+.usernames {
+    -fx-background-color: transparent;
+    -fx-font-size: 16px;
+    -fx-font-family: 'Orbitron';
+}
+
+.usernamesbold {
+    -fx-background-color: transparent;
+    -fx-font-size: 16px;
+    -fx-font-family: 'Orbitron';
+    -fx-font-weight: bold;
 }
 
 TextField {

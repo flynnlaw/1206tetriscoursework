@@ -97,17 +97,20 @@ public class MenuScene extends BaseScene {
 
         //For now, let us just add a button that starts the game. I'm sure you'll do something way better.
         var singleplayerbutton = new Button("Single Player");
+        var multiplayerbutton = new Button("Multi Player");
         var instructionsbutton = new Button("Instructions");
         VBox vbox = new VBox();
-        vbox.getChildren().addAll(singleplayerbutton, instructionsbutton);
+        vbox.getChildren().addAll(singleplayerbutton, multiplayerbutton, instructionsbutton);
         vbox.setAlignment(Pos.TOP_CENTER);
         flowPane.getChildren().add(vbox);
 
         singleplayerbutton.getStyleClass().add("title");
+        multiplayerbutton.getStyleClass().add("title");
         instructionsbutton.getStyleClass().add("title");
 
         //Bind the button action to the startGame method in the menu
         singleplayerbutton.setOnAction(this::startGame);
+        multiplayerbutton.setOnAction(this::gotomultiplayer);
         instructionsbutton.setOnAction(this::gotoinstructions);
     }
 
@@ -132,6 +135,8 @@ public class MenuScene extends BaseScene {
     private void gotoinstructions(ActionEvent event){
         gameWindow.startinstructions();
     }
+
+    private void gotomultiplayer(ActionEvent event){gameWindow.startlobby();}
 
 
 }
