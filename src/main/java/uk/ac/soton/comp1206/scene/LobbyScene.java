@@ -9,9 +9,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.CacheHint;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -57,7 +55,15 @@ public class LobbyScene extends BaseScene{
 
     String nickname;
 
+    BorderPane mainPane;
+
+    Boolean inchannel = false;
+
+    VBox chatboxvbox;
     VBox bottomvbox;
+    HBox buttonhbox;
+
+    Button startgamebutton;
 
     private static final Logger logger = LogManager.getLogger(LobbyScene.class);
     public LobbyScene(GameWindow gameWindow) {
@@ -76,7 +82,7 @@ public class LobbyScene extends BaseScene{
         menuPane.setMaxHeight(gameWindow.getHeight());
         menuPane.getStyleClass().add("menu-background");
         root.getChildren().add(menuPane);
-        var mainPane = new BorderPane();
+        mainPane = new BorderPane();
         menuPane.getChildren().add(mainPane);
         VBox channelsandhostvbox = new VBox();
         channelsandhostvbox.setPrefSize(181,400);
@@ -108,20 +114,11 @@ public class LobbyScene extends BaseScene{
         HBox titleshbox = new HBox();
         titleshbox.setPrefSize(600,70);
         mainPane.setTop(titleshbox);
-        chatwindow = new BorderPane();
-        VBox leftvbox = new VBox();
-        leftvbox.setPrefSize(46,271);
-        VBox rightvbox = new VBox();
-        rightvbox.setPrefSize(30,271);
-        bottomvbox = new VBox();
-        bottomvbox.setPrefSize(442,160);
-        chatwindow.setLeft(leftvbox);
-        chatwindow.setRight(rightvbox);
-        chatwindow.setBottom(bottomvbox);
+
 //        leftvbox.setStyle("-fx-border-width: 0 1px 0 0; -fx-border-color: white;");
 
 
-        mainPane.setCenter(chatwindow);
+
         requestchannels();
         initializeTimer();
 
@@ -176,22 +173,17 @@ public class LobbyScene extends BaseScene{
 
             // Add event handler only if makechatwindow hasn't been called for this channel
             if (!openedChannels.contains(channel)) {
-                lobby.setOnMouseClicked(mouseEvent -> {
-                    this.makechatwindow(channel);
-                    // Add the channel to the set to indicate makechatwindow has been called
-                    openedChannels.add(channel);
-                });
-            }
-            lobby.setOnMouseClicked(mouseEvent -> {
-                if(!openedChannels.contains(channel)){
-                    this.makechatwindow(channel);
-                    // Add the channel to the set to indicate makechatwindow has been called
-                    openedChannels.add(channel);
-                }
-                else{
-                    mouseEvent.consume();
-                }
+        lobby.setOnMouseClicked(
+            mouseEvent -> {
+                communicator.send("JOIN " + channel);
+              if (!(inchannel)) {
+                this.makechatwindow(channel);
+                lobby.setTextFill(Color.YELLOW);
+                // Add the channel to the set to indicate makechatwindow has been called
+                openedChannels.add(channel);
+              }
             });
+            }
 
 
             // Add the label to channelvbox
@@ -210,6 +202,17 @@ public class LobbyScene extends BaseScene{
 
 
     public void makechatwindow(String channel) {
+        chatwindow = new BorderPane();
+        mainPane.setCenter(chatwindow);
+        bottomvbox = new VBox();
+        chatboxvbox = new VBox();
+        VBox buttonvbox = new VBox();
+        buttonhbox = new HBox();
+        buttonvbox.getChildren().add(buttonhbox);
+        bottomvbox.getChildren().addAll(chatboxvbox,buttonvbox);
+        bottomvbox.setPrefSize(442,160);
+        chatwindow.setBottom(bottomvbox);
+        chatwindow.setMargin(chatwindow,new Insets(0,10,0,100));
         logger.info("chat");
         chattextflow = new TextFlow();
         scroller = new ScrollPane();
@@ -224,7 +227,7 @@ public class LobbyScene extends BaseScene{
         usernames = new TextFlow();
         usernames.setPrefSize(442,25);
         usernames.getStyleClass().add("scroller");
-        usernames.setPadding(new Insets(0,0,0,48));
+        usernames.setPadding(new Insets(0,0,0,10));
         chatwindow.setTop(usernames);
         updateTimer.stop();
         Text intro = new Text("""
@@ -238,18 +241,57 @@ public class LobbyScene extends BaseScene{
 
         // Create the user input text field
         TextField userinput = new TextField();
-        bottomvbox.getChildren().add(userinput);
+        userinput.setPadding(new Insets(0,0,0,10));
+        userinput.setPromptText("Enter message");
 
-        // Set an event handler for the user input text field
-        userinput.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.ENTER) {
-                // Send command when Enter is pressed
-                System.out.println("entered");
-                String gameName = userinput.getText().trim();
-                if (!gameName.isEmpty()) {}
+        scroller.getPrefWidth();
+        userinput.setPrefSize(500,30);
+        chatboxvbox.getChildren().add(userinput);
+        chatboxvbox.getStyleClass().add("scroller");
+
+
+
+    // Set an event handler for the user input text field
+    userinput.setOnKeyPressed(
+        event -> {
+          if (event.getCode() == KeyCode.ENTER) {
+            // Send command when Enter is pressed
+            String text = userinput.getText().trim();
+            if (text.split(" ")[0].toUpperCase().equals("/NICK")) {
+              communicator.send("NICK " + text.replaceAll("(?i)/nick\\s*", ""));
+              userinput.clear();
+            } else {
+              communicator.send("MSG " + text);
+              userinput.clear();
+            }
+          }
+        });
+
+        startgamebutton = new Button("Start Game");
+        Button leavegamebutton = new Button("Leave Game");
+        buttonhbox.setMargin(leavegamebutton,new Insets(10,0,0,345));
+        buttonhbox.setMargin(startgamebutton,new Insets(10,0,0,0));
+        startgamebutton.setVisible(false);
+        buttonhbox.getChildren().addAll(startgamebutton,leavegamebutton);
+        leavegamebutton.setOnMouseClicked(mouseEvent -> {
+            communicator.send("PART");
+            requestchannels();
+            updateTimer.play();
+            mainPane.setCenter(null);
+            inchannel = false;
+            for (Node node : channelvbox.getChildren()) {
+                // Check if the node is a label
+                if (node instanceof Label) {
+                    // Update the text color to white
+                    ((Label) node).setTextFill(Color.WHITE);
+                }
             }
         });
-        communicator.send("JOIN "+channel);
+
+
+
+
+        inchannel = true;
     }
 
     public void fillusernames(String[] users){
@@ -267,10 +309,7 @@ public class LobbyScene extends BaseScene{
                 usernameText.getStyleClass().add("usernames");
                 this.usernames.getChildren().add(usernameText);
             }
-            // Add the username Text to the TextFlow
-
         }
-
     }
 
     public void receiveMessage(String message) {
@@ -287,7 +326,11 @@ public class LobbyScene extends BaseScene{
             }
 
             case "NICK" ->{
-                nickname = commands[1];
+                String[] playername= commands[1].split(":");
+                if (!(playername.length==2)){
+                    nickname = playername[0];
+                }
+
             }
 
             case "USERS" ->{
@@ -304,11 +347,23 @@ public class LobbyScene extends BaseScene{
             }
 
             case "JOIN" ->{
-                makechatwindow(commands[1]);
+                if(!(inchannel)){
+                    makechatwindow(commands[1]);
+                    inchannel = true;
+                    requestchannels();
+                    logger.info("joined "+commands[1]);
+
+                }
             }
 
             case "ERROR" ->{
-                logger.info("join");
+                String errormessage = message.replaceAll("ERROR ","");
+                var alertbox = new Alert(Alert.AlertType.ERROR, errormessage);
+                alertbox.showAndWait();
+            }
+
+            case "HOST" ->{
+                startgamebutton.setVisible(true);
             }
 
 
@@ -322,7 +377,7 @@ public class LobbyScene extends BaseScene{
 
     @Override
     public void initialise() {
-
+        updateTimer.stop();
         scene.setOnKeyPressed(
                 new EventHandler<KeyEvent>() {
                     @Override
