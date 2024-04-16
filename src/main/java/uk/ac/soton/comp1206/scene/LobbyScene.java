@@ -46,6 +46,8 @@ public class LobbyScene extends BaseScene{
     VBox channelvbox = new VBox();
     private Timeline updateTimer;
 
+    private Set<String> openedChannels = new HashSet<>();
+
     TextFlow chattextflow;
     TextFlow usernames;
 
@@ -54,6 +56,8 @@ public class LobbyScene extends BaseScene{
     BorderPane chatwindow;
 
     String nickname;
+
+    VBox bottomvbox;
 
     private static final Logger logger = LogManager.getLogger(LobbyScene.class);
     public LobbyScene(GameWindow gameWindow) {
@@ -109,8 +113,8 @@ public class LobbyScene extends BaseScene{
         leftvbox.setPrefSize(46,271);
         VBox rightvbox = new VBox();
         rightvbox.setPrefSize(30,271);
-        VBox bottomvbox = new VBox();
-        bottomvbox.setPrefSize(442,41);
+        bottomvbox = new VBox();
+        bottomvbox.setPrefSize(442,160);
         chatwindow.setLeft(leftvbox);
         chatwindow.setRight(rightvbox);
         chatwindow.setBottom(bottomvbox);
@@ -169,7 +173,28 @@ public class LobbyScene extends BaseScene{
             Label lobby = new Label(channel);
             lobby.getStyleClass().add("channelItem");
             lobby.setTextFill(Color.WHITE);
-            lobby.setOnMouseClicked(mouseEvent -> this.makechatwindow(channel));
+
+            // Add event handler only if makechatwindow hasn't been called for this channel
+            if (!openedChannels.contains(channel)) {
+                lobby.setOnMouseClicked(mouseEvent -> {
+                    this.makechatwindow(channel);
+                    // Add the channel to the set to indicate makechatwindow has been called
+                    openedChannels.add(channel);
+                });
+            }
+            lobby.setOnMouseClicked(mouseEvent -> {
+                if(!openedChannels.contains(channel)){
+                    this.makechatwindow(channel);
+                    // Add the channel to the set to indicate makechatwindow has been called
+                    openedChannels.add(channel);
+                }
+                else{
+                    mouseEvent.consume();
+                }
+            });
+
+
+            // Add the label to channelvbox
             channelvbox.getChildren().add(lobby);
         }
 
@@ -183,7 +208,8 @@ public class LobbyScene extends BaseScene{
         }
     }
 
-    public void makechatwindow(String channel){
+
+    public void makechatwindow(String channel) {
         logger.info("chat");
         chattextflow = new TextFlow();
         scroller = new ScrollPane();
@@ -191,6 +217,8 @@ public class LobbyScene extends BaseScene{
         scroller.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scroller.setContent(chattextflow);
         scroller.setFitToWidth(true);
+        scroller.setPadding(new Insets(10,0,0,10));
+        scroller.setPrefSize(332,200);
         chatwindow.setCenter(scroller);
         chatwindow.getStyleClass().add("scroller");
         usernames = new TextFlow();
@@ -199,6 +227,28 @@ public class LobbyScene extends BaseScene{
         usernames.setPadding(new Insets(0,0,0,48));
         chatwindow.setTop(usernames);
         updateTimer.stop();
+        Text intro = new Text("""
+        Welcome to the lobby
+        Type /nick [your nickname] to change your nickname
+
+        """);
+        intro.getStyleClass().add("messages");
+        intro.setFill(Color.WHITE);
+        chattextflow.getChildren().add(intro);
+
+        // Create the user input text field
+        TextField userinput = new TextField();
+        bottomvbox.getChildren().add(userinput);
+
+        // Set an event handler for the user input text field
+        userinput.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                // Send command when Enter is pressed
+                System.out.println("entered");
+                String gameName = userinput.getText().trim();
+                if (!gameName.isEmpty()) {}
+            }
+        });
         communicator.send("JOIN "+channel);
     }
 
