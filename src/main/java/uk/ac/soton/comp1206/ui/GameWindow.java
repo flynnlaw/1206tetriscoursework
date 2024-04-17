@@ -6,12 +6,16 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.ac.soton.comp1206.App;
 import uk.ac.soton.comp1206.game.Game;
 import uk.ac.soton.comp1206.network.Communicator;
 import uk.ac.soton.comp1206.scene.*;
+
+import java.util.List;
+import java.util.Queue;
 
 /**
  * The GameWindow is the single window for the game where everything takes place. To move between screens in the game,
@@ -84,13 +88,21 @@ public class GameWindow {
     /**
      * Display the single player challenge
      */
-    public void startChallenge() { loadScene(new ChallengeScene(this)); }
+    public void startChallenge() {loadScene(new ChallengeScene(this));}
+
+    public void startMultiplayerChallenge(Communicator communicator){
+    loadScene(new MultiplayerScene(this, communicator));
+  }
 
     public void startinstructions(){
     loadScene(new InstructionsScene(this));}
 
     public void startscores(Game game){
     loadScene(new ScoresScene(this, game));
+    }
+
+    public void startmultiscores(Game game, List<Pair<String,Integer>> scores){
+        loadScene(new MultiplayerScoreScene(this, game, scores));
     }
 
     public void startlobby(){

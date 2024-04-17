@@ -39,18 +39,18 @@ import java.util.Set;
  */
 public class ChallengeScene extends BaseScene implements NextPieceListener, RightClickedListener, LineClearedListener, GameLoopListener {
 
-    private static final Logger logger = LogManager.getLogger(MenuScene.class);
+    private static final Logger logger = LogManager.getLogger(ChallengeScene.class);
     protected Game game;
     Multimedia multimedia = new Multimedia();
 
-    private PieceBoard pieceboard;
-    private PieceBoard nextpieceboard;
+    protected PieceBoard pieceboard;
+    protected PieceBoard nextpieceboard;
 
-    private GameBoard board;
+    protected GameBoard board;
 
-    private Rectangle timerectangle;
+    protected Rectangle timerectangle;
 
-    private Timeline timeline = new Timeline();
+    protected Timeline timeline = new Timeline();
 
     BorderPane mainPane = new BorderPane();
 
@@ -170,7 +170,7 @@ public class ChallengeScene extends BaseScene implements NextPieceListener, Righ
      * Handle when a block is clicked
      * @param gameBlock the Game Block that was clocked
      */
-    private void blockClicked(GameBlock gameBlock) {
+    protected void blockClicked(GameBlock gameBlock) {
         game.blockClicked(gameBlock);
     }
 
@@ -211,6 +211,7 @@ public class ChallengeScene extends BaseScene implements NextPieceListener, Righ
 
     @Override
     public void nextpiece(GamePiece piece) {
+        pieceboard.emptygrid();
         pieceboard.displaypiece(piece);
 
     }

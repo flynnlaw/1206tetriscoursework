@@ -29,9 +29,9 @@ public class ScoreList extends VBox {
             Color.PURPLE,
             Color.rgb(74,65,42)
     };
-    private ObservableList<Pair<String, Integer>> scores;
+    protected ObservableList<Pair<String, Integer>> scores;
 
-    private List<Pair<String, Integer>> scoreslist;
+    protected List<Pair<String, Integer>> scoreslist;
     SimpleListProperty scoresProperty;
 
     public ScoreList(List<Pair<String, Integer>> scoresList, String localoronline) {

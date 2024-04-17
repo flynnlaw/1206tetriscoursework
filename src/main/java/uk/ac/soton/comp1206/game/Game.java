@@ -3,7 +3,6 @@ package uk.ac.soton.comp1206.game;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.media.Media;
-import javafx.scene.shape.Line;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.ac.soton.comp1206.component.GameBlock;
@@ -44,18 +43,18 @@ public class Game{
 
     protected final Grid nextpieceboard;
 
-    private NextPieceListener nextPieceListener;
+    protected NextPieceListener nextPieceListener;
 
-    private LineClearedListener lineClearedListener;
+    protected LineClearedListener lineClearedListener;
 
-    private GameLoopListener gameLoopListener;
+    protected GameLoopListener gameLoopListener;
 
     Multimedia multimedia = new Multimedia();
 
 
     SimpleIntegerProperty score = new SimpleIntegerProperty(0);
     SimpleIntegerProperty level = new SimpleIntegerProperty(0);
-    SimpleIntegerProperty lives = new SimpleIntegerProperty(0);
+    SimpleIntegerProperty lives = new SimpleIntegerProperty(3);
     SimpleIntegerProperty multiplier = new SimpleIntegerProperty(1);
 
     GamePiece currentPiece;
@@ -78,7 +77,7 @@ public class Game{
     Media placesound = new Media(new File(placesoundpath).toURI().toString());
     Media suiiisound = new Media(new File(suiiisoundpath).toURI().toString());
 
-   private Timer timer;
+   protected Timer timer;
 
     /**
      * Create a new game with the specified rows and columns. Creates a corresponding grid model.
@@ -147,10 +146,6 @@ public class Game{
         }else{
             multimedia.setaudioplayer(failsound);
         }
-
-    }
-
-    public void blockchanged(GamePiece piece){
 
     }
 
@@ -271,6 +266,7 @@ public class Game{
 
 
     }
+
 
     public void checkempty(){
     int count = 0;

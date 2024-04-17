@@ -1,16 +1,14 @@
 package uk.ac.soton.comp1206.scene;
 
-import javafx.animation.*;
-import javafx.beans.property.SimpleListProperty;
-import javafx.event.EventHandler;
+import javafx.animation.FadeTransition;
+import javafx.animation.ParallelTransition;
+import javafx.animation.SequentialTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.util.Duration;
 import javafx.util.Pair;
@@ -18,37 +16,24 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.ac.soton.comp1206.event.CommunicationsListener;
 import uk.ac.soton.comp1206.game.Game;
-import uk.ac.soton.comp1206.network.Communicator;
 import uk.ac.soton.comp1206.ui.GamePane;
 import uk.ac.soton.comp1206.ui.GameWindow;
 import uk.ac.soton.comp1206.ui.ScoreList;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.Comparator;
+import java.io.FileInputStream;
 import java.util.List;
 
-public class ScoresScene extends BaseScene{
+public class MultiplayerScoreScene extends ScoresScene{
 
-    private static final Logger logger = LogManager.getLogger(ScoresScene.class);
+    private static final Logger logger = LogManager.getLogger(MultiplayerScoreScene.class);
 
-    protected final List<Pair<String, Integer>> scoresList = new ArrayList<>();
-    protected final List<Pair<String,Integer>> onlinescorelist = new ArrayList<>();
+    List<Pair<String,Integer>> scores;
 
 
-    Communicator communicator = gameWindow.getCommunicator();
+    public MultiplayerScoreScene(GameWindow gameWindow, Game game, List<Pair<String,Integer>> scores) {
+        super(gameWindow, game);
+        this.scores = scores;
 
-    TextField field;
-
-    ScoreList scoredisplay;
-
-    ScoreList onlinescoredisplay;
-
-    Game gamestate;
-    public ScoresScene(GameWindow gameWindow, Game game) {
-        super(gameWindow);
-        this.gamestate = game;
-        logger.info("Creating Scores Scene");
     }
 
     @Override
@@ -63,7 +48,6 @@ public class ScoresScene extends BaseScene{
         root.getChildren().add(menuPane);
         var mainPane = new BorderPane();
         menuPane.getChildren().add(mainPane);
-        List<Pair<String,Integer>> scores = loadScores();
         scoredisplay = new ScoreList(scores,"local");
         try{
             VBox topvbox = new VBox();
@@ -121,14 +105,13 @@ public class ScoresScene extends BaseScene{
 
             field.setVisible(false);
             button.setVisible(false);
-            if(gamestate.getScore().get()>getMinimumScore() || gamestate.getScore().get()>getMinimumOnlineScore()){
+            if(gamestate.getScore().get()>getMinimumOnlineScore()){
                 field.setVisible(true);
                 button.setVisible(true);
                 scoredisplay.setVisible(false);
                 onlinescoredisplay.setVisible(false);
 
                 button.setOnAction(actionEvent -> {
-                    addtoscores("local");
                     if(gamestate.getScore().get()>getMinimumOnlineScore()){
                         writeonlinescore(gamestate.getScore().getValue());
                     }
@@ -141,7 +124,6 @@ public class ScoresScene extends BaseScene{
                     parallelTransitionifbuttonispressed.getChildren().addAll(scoredisplay.getParallelTransition().getChildren());
                     parallelTransitionifbuttonispressed.getChildren().addAll(onlinescoredisplay.getParallelTransition().getChildren());
                     parallelTransitionifbuttonispressed.play();
-                    writeScores(scoresList);
                 });
             }else{
                 parallelTransition.play();
@@ -158,107 +140,25 @@ public class ScoresScene extends BaseScene{
 
     }
 
-    public List<Pair<String,Integer>> loadScores(){
-        try (BufferedReader filereader = new BufferedReader(new FileReader("src/main/resources/localscores.txt"))) {
-            String line;
-            while ((line = filereader.readLine()) != null) {
-                String[] parts = line.split(":");
-                if (parts.length == 2) {
-                    String name = parts[0];
-                    int score = Integer.parseInt(parts[1].trim()); // Trim to remove leading/trailing spaces
-                    scoresList.add(new Pair<>(name, score));
-                } else {
-                    System.err.println("Invalid line format: " + line);
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-     return scoresList;
-    }
-
-    public void writeScores(List<Pair<String, Integer>> scoresList) {
-        File file = new File("src/main/resources/localscores.txt");
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-            // Write each score in the list to the file
-            for (int i = scoresList.size() - 1; i >= 0; i--) {
-                Pair<String, Integer> score = scoresList.get(i);
-                writer.write(score.getKey() + ":" + score.getValue());
-                writer.newLine();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public int getMinimumScore(){
-        return scoresList.get(scoresList.size()-1).getValue();
-    }
-
-    public int getMinimumOnlineScore(){
-        return onlinescoredisplay.getScoreslist().get(9).getValue();
-    }
-
-
-    public void addtoscores(String localoronline){
-        changescores(field.getText(),localoronline);
-    }
-
-    public void changescores(String name, String localoronline){
-        if(localoronline.equals("local")){
-      scoresList.add(new Pair<>(name, gamestate.getScore().get()));
-      scoresList.sort(Comparator.comparing(Pair::getValue));
-      scoresList.remove(scoresList.get(0));
-      scoredisplay.changelist(scoresList);
-    }
-        else{
-            onlinescorelist.add(new Pair<>(name, gamestate.getScore().get()));
-            onlinescorelist.sort(Comparator.comparing(Pair::getValue));
-            onlinescorelist.remove(onlinescorelist.get(0));
-            onlinescoredisplay.changelist(onlinescorelist);
-        }
-    }
-
     public void loadOnlineScores(){
         communicator.send("HISCORES");
         communicator.addListener(new CommunicationsListener() {
             @Override
             public void receiveCommunication(String communication) {
-                String[] lines = communication.split("\\n");
-                lines[0] = lines[0].replaceAll("HISCORES ","");
-                for(String highscore: lines){
-                    String[] parts = highscore.split(":");
-                    Pair<String,Integer> toadd = new Pair<>(parts[0],Integer.parseInt(parts[1].trim()));
-                    onlinescorelist.add(toadd);
-                }
-                setonlinescoredisplay(onlinescorelist);
+                String[] commands = communication.split(" ");
+                if(commands[0].equals("HISCORES")){
+                    String[] lines = communication.split("\\n");
+                    lines[0] = lines[0].replaceAll("HISCORES ","");
+                    for(String highscore: lines){
+                        String[] parts = highscore.split(":");
+                        Pair<String,Integer> toadd = new Pair<>(parts[0],Integer.parseInt(parts[1].trim()));
+                        onlinescorelist.add(toadd);
+                    }
+                    setonlinescoredisplay(onlinescorelist);
 
-            }
+                }
+                }
+
         });
     }
-
-    public void setonlinescoredisplay(List<Pair<String,Integer>> list){
-        onlinescoredisplay = new ScoreList(list,"online");
-    }
-
-    public void writeonlinescore(int score){
-        String name = field.getText();
-        communicator.send("HISCORE <"+name+">:<"+score+">");
-        addtoscores("online");
-    }
-
-
-    @Override
-    public void initialise() {
-        scene.setOnKeyPressed(
-                new EventHandler<KeyEvent>() {
-                    @Override
-                    public void handle(KeyEvent keyEvent) {
-                        if (keyEvent.getCode().equals(KeyCode.ESCAPE)) {
-                            gameWindow.startMenu();
-                        }
-                    }
-                });
-    }
-
 }

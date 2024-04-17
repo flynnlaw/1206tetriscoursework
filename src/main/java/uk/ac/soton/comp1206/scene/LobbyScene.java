@@ -6,37 +6,22 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.CacheHint;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
-import javafx.util.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import uk.ac.soton.comp1206.component.PieceBoard;
-import uk.ac.soton.comp1206.event.CommunicationsListener;
-import uk.ac.soton.comp1206.game.Grid;
 import uk.ac.soton.comp1206.network.Communicator;
 import uk.ac.soton.comp1206.ui.GamePane;
 import uk.ac.soton.comp1206.ui.GameWindow;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 
 public class LobbyScene extends BaseScene{
 
@@ -73,6 +58,7 @@ public class LobbyScene extends BaseScene{
 
     @Override
     public void build() {
+        initializeTimer();
         communicator.addListener((message) -> Platform.runLater(() -> this.receiveMessage(message)));
         channelvbox.setPadding(new Insets(0,0,0,20));
         logger.info("Building " + this.getClass().getName());
@@ -120,29 +106,21 @@ public class LobbyScene extends BaseScene{
 
 
         requestchannels();
-        initializeTimer();
+
 
 
 
 
 
     }
-
     private void initializeTimer() {
-        // Create a timeline with a keyframe that repeats every 5 seconds
-        updateTimer = new Timeline(new KeyFrame(Duration.seconds(5), new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                // Request current channels using the communicator
-                requestchannels();
-            }
+        updateTimer = new Timeline(new KeyFrame(Duration.seconds(5), event -> {
+            // Code to execute every 5 seconds
+            logger.info("Timer fired, requesting channels...");
+            requestchannels();
         }));
-
-        // Set the cycle count to indefinite so that the timer repeats indefinitely
-        updateTimer.setCycleCount(Timeline.INDEFINITE);
-
-        // Start the timer
-        updateTimer.play();
+        updateTimer.setCycleCount(Timeline.INDEFINITE); // Repeat indefinitely
+        updateTimer.play(); // Start the timer
     }
 
     public void requestchannels() {
@@ -288,6 +266,11 @@ public class LobbyScene extends BaseScene{
             }
         });
 
+        startgamebutton.setOnMouseClicked(mouseEvent -> {
+            communicator.send("START");
+            gameWindow.startMultiplayerChallenge(communicator);
+        });
+
 
 
 
@@ -340,10 +323,17 @@ public class LobbyScene extends BaseScene{
 
             case "MSG" ->{
                 String[] usermessage = message.replaceAll("MSG ","").split(":");
-                Text newmessage = new Text("<"+usermessage[0]+"> "+usermessage[1]+"\n");
-                newmessage.getStyleClass().add("messages");
-                newmessage.setFill(Color.WHITE);
-                chattextflow.getChildren().add(newmessage);
+                if (usermessage.length >= 2) {
+                    Text newmessage = new Text("<" + usermessage[0] + "> " + usermessage[1] + "\n");
+                    newmessage.getStyleClass().add("messages");
+                    newmessage.setFill(Color.WHITE);
+                    chattextflow.getChildren().add(newmessage);
+                }else{
+                    Text newmessage = new Text("<" + usermessage[0] + ">\n");
+                    newmessage.getStyleClass().add("messages");
+                    newmessage.setFill(Color.WHITE);
+                    chattextflow.getChildren().add(newmessage);
+                }
             }
 
             case "JOIN" ->{
@@ -366,6 +356,10 @@ public class LobbyScene extends BaseScene{
                 startgamebutton.setVisible(true);
             }
 
+            case "START" ->{
+                gameWindow.startMultiplayerChallenge(communicator);
+            }
+
 
         }
 
@@ -377,13 +371,13 @@ public class LobbyScene extends BaseScene{
 
     @Override
     public void initialise() {
-        updateTimer.stop();
         scene.setOnKeyPressed(
                 new EventHandler<KeyEvent>() {
                     @Override
                     public void handle(KeyEvent keyEvent) {
                         if (keyEvent.getCode().equals(KeyCode.ESCAPE)) {
                             communicator.send("PART");
+                            updateTimer.stop();
                             gameWindow.startMenu();
                         }
                     }
