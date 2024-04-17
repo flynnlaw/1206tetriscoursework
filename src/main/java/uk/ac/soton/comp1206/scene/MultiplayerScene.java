@@ -1,23 +1,16 @@
 package uk.ac.soton.comp1206.scene;
 
-import javafx.animation.FillTransition;
-import javafx.animation.Timeline;
 import javafx.application.Platform;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.util.Pair;
 import org.apache.logging.log4j.LogManager;
@@ -31,15 +24,10 @@ import uk.ac.soton.comp1206.network.Communicator;
 import uk.ac.soton.comp1206.ui.GamePane;
 import uk.ac.soton.comp1206.ui.GameWindow;
 import uk.ac.soton.comp1206.ui.Leaderboard;
-import uk.ac.soton.comp1206.ui.Multimedia;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
 
 public class MultiplayerScene extends ChallengeScene{
 
@@ -156,6 +144,7 @@ public class MultiplayerScene extends ChallengeScene{
         userinput.setVisible(false);
         centrevbox.setMargin(userinput,new Insets(0,89,0,89));
         label = new Label("Press / to receive/send messages");
+        label.getStyleClass().add("messages");
         label.setTextFill(Color.WHITE);
         centrevbox.getChildren().addAll(board,label,userinput);
         mainPane.setCenter(centrevbox);
@@ -163,6 +152,8 @@ public class MultiplayerScene extends ChallengeScene{
                 event -> {
                     if (event.getCode() == KeyCode.ENTER) {
                         communicator.send("MSG "+userinput.getText());
+                        userinput.clear();
+                        userinput.deselect();
                     }
                 });
 

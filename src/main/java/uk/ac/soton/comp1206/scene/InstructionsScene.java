@@ -11,22 +11,31 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.media.Media;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.ac.soton.comp1206.component.PieceBoard;
 import uk.ac.soton.comp1206.game.Grid;
 import uk.ac.soton.comp1206.ui.GamePane;
 import uk.ac.soton.comp1206.ui.GameWindow;
+import uk.ac.soton.comp1206.ui.Multimedia;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
 public class InstructionsScene extends BaseScene{
+  Multimedia multimedia = new Multimedia();
 
     private static final Logger logger = LogManager.getLogger(InstructionsScene.class);
     public InstructionsScene(GameWindow gameWindow) {
         super(gameWindow);
         logger.info("Creating Menu Scene");
+      String path = "src/main/resources/music/menu.mp3";
+      String path1 = "src/main/resources/music/suiiianthem.mp3";
+      Media backgroundmusic = new Media(new File(path).toURI().toString());
+      logger.info("playing background music");
+      multimedia.playmenumusic(backgroundmusic);
     }
 
   @Override
@@ -93,6 +102,7 @@ public class InstructionsScene extends BaseScene{
           @Override
           public void handle(KeyEvent keyEvent) {
             if (keyEvent.getCode().equals(KeyCode.ESCAPE)) {
+              multimedia.stopmusicplayer();
               gameWindow.startMenu();
             }
           }

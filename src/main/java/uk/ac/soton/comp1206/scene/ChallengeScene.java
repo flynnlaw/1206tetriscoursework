@@ -207,8 +207,6 @@ public class ChallengeScene extends BaseScene implements NextPieceListener, Righ
 
 
     }
-
-
     @Override
     public void nextpiece(GamePiece piece) {
         pieceboard.emptygrid();
@@ -269,7 +267,8 @@ public class ChallengeScene extends BaseScene implements NextPieceListener, Righ
                 new KeyFrame(Duration.ZERO, new KeyValue(timerectangle.widthProperty(), 800)),
                 new KeyFrame(Duration.millis(delay), new KeyValue(timerectangle.widthProperty(), 0))
         );
-        fillTransition.setDuration(Duration.millis(delay));
+        Duration fillTransitionDuration = Duration.millis(delay * 1.5); // Adjust the multiplier as needed
+        fillTransition.setDuration(fillTransitionDuration);
         fillTransition.setShape(timerectangle);
         fillTransition.setFromValue(Color.GREEN);
         fillTransition.setToValue(Color.RED);
@@ -280,6 +279,7 @@ public class ChallengeScene extends BaseScene implements NextPieceListener, Righ
     @Override
     public void gameended(Game game) {
         logger.info("game ended");
+        multimedia.stopmusicplayer();
         timeline.stop();
         gameWindow.startscores(game);
     }

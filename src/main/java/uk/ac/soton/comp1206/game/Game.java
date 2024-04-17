@@ -247,7 +247,12 @@ public class Game{
             }
             logger.info("column"+column+"deleted");
         }
-        if(beforesize!=aftersize){
+    if (!(columnstodelete.isEmpty())||!(rowstodelete.isEmpty())){
+        String path = "src/main/resources/sounds/clear.wav";
+        Media linecleared = new Media(new File(path).toURI().toString());
+        multimedia.setaudioplayer(linecleared);
+    }
+      if (beforesize != aftersize) {
             multimedia.setaudioplayer(clearsound);
         }
         int prevscore = score.getValue();
@@ -255,7 +260,14 @@ public class Game{
         int newscore = score.getValue();
         if (prevscore!=newscore){
             multiplier.set(multiplier.getValue()+1);
+            Integer levelbefore = level.getValue();
             level.set((score.getValue()/1000));
+            Integer levelafter = level.getValue();
+            if (levelbefore!=levelafter){
+                String path = "src/main/resources/sounds/level.wav";
+                Media levelup = new Media(new File(path).toURI().toString());
+                multimedia.setaudioplayer(levelup);
+            }
         }else{
             multiplier.set(1);
         }
@@ -378,9 +390,15 @@ public class Game{
             stoptimer();
             Platform.runLater(() -> {
                 gameLoopListener.gameended(this);
+                String path = "src/main/resources/sounds/explode.wav";
+                Media gameend = new Media(new File(path).toURI().toString());
+                multimedia.setaudioplayer(gameend);
             });
         }else{
             lives.set(lives.get()-1);
+            String path = "src/main/resources/sounds/lifelose.wav";
+            Media lifelost = new Media(new File(path).toURI().toString());
+            multimedia.setaudioplayer(lifelost);
             multiplier.set(1);
             nextPiece();
             if (gameLoopListener != null) {

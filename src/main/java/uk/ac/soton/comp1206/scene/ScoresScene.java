@@ -1,7 +1,6 @@
 package uk.ac.soton.comp1206.scene;
 
 import javafx.animation.*;
-import javafx.beans.property.SimpleListProperty;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -12,6 +11,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
+import javafx.scene.media.Media;
 import javafx.util.Duration;
 import javafx.util.Pair;
 import org.apache.logging.log4j.LogManager;
@@ -21,6 +21,7 @@ import uk.ac.soton.comp1206.game.Game;
 import uk.ac.soton.comp1206.network.Communicator;
 import uk.ac.soton.comp1206.ui.GamePane;
 import uk.ac.soton.comp1206.ui.GameWindow;
+import uk.ac.soton.comp1206.ui.Multimedia;
 import uk.ac.soton.comp1206.ui.ScoreList;
 
 import java.io.*;
@@ -44,11 +45,16 @@ public class ScoresScene extends BaseScene{
 
     ScoreList onlinescoredisplay;
 
+    Multimedia multimedia = new Multimedia();
+
     Game gamestate;
     public ScoresScene(GameWindow gameWindow, Game game) {
         super(gameWindow);
         this.gamestate = game;
         logger.info("Creating Scores Scene");
+        String path = "src/main/resources/music/end.wav";
+        Media gameend = new Media(new File(path).toURI().toString());
+        multimedia.setaudioplayer(gameend);
     }
 
     @Override

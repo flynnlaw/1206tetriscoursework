@@ -3,7 +3,6 @@ package uk.ac.soton.comp1206.scene;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
@@ -11,6 +10,7 @@ import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
+import javafx.scene.media.Media;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
@@ -20,7 +20,9 @@ import org.apache.logging.log4j.Logger;
 import uk.ac.soton.comp1206.network.Communicator;
 import uk.ac.soton.comp1206.ui.GamePane;
 import uk.ac.soton.comp1206.ui.GameWindow;
+import uk.ac.soton.comp1206.ui.Multimedia;
 
+import java.io.File;
 import java.util.*;
 
 public class LobbyScene extends BaseScene{
@@ -28,6 +30,8 @@ public class LobbyScene extends BaseScene{
     Communicator communicator = gameWindow.getCommunicator();
     VBox channelvbox = new VBox();
     private Timeline updateTimer;
+
+    Multimedia multimedia = new Multimedia();
 
     private Set<String> openedChannels = new HashSet<>();
 
@@ -50,10 +54,15 @@ public class LobbyScene extends BaseScene{
 
     Button startgamebutton;
 
+
     private static final Logger logger = LogManager.getLogger(LobbyScene.class);
     public LobbyScene(GameWindow gameWindow) {
         super(gameWindow);
         logger.info("Creating Menu Scene");
+        String path = "src/main/resources/music/menu.mp3";
+        String path1 = "src/main/resources/music/suiiianthem.mp3";
+        Media backgroundmusic = new Media(new File(path).toURI().toString());
+        multimedia.playmenumusic(backgroundmusic);
     }
 
     @Override
@@ -268,6 +277,7 @@ public class LobbyScene extends BaseScene{
 
         startgamebutton.setOnMouseClicked(mouseEvent -> {
             communicator.send("START");
+            multimedia.stopmusicplayer();
             gameWindow.startMultiplayerChallenge(communicator);
         });
 
@@ -334,6 +344,9 @@ public class LobbyScene extends BaseScene{
                     newmessage.setFill(Color.WHITE);
                     chattextflow.getChildren().add(newmessage);
                 }
+                String path = "src/main/resources/sounds/message.wav";
+                Media messagerecieved = new Media(new File(path).toURI().toString());
+                multimedia.setaudioplayer(messagerecieved);
             }
 
             case "JOIN" ->{
@@ -358,6 +371,8 @@ public class LobbyScene extends BaseScene{
 
             case "START" ->{
                 gameWindow.startMultiplayerChallenge(communicator);
+                multimedia.stopmusicplayer();
+
             }
 
 
@@ -378,6 +393,7 @@ public class LobbyScene extends BaseScene{
                         if (keyEvent.getCode().equals(KeyCode.ESCAPE)) {
                             communicator.send("PART");
                             updateTimer.stop();
+                            multimedia.stopmusicplayer();
                             gameWindow.startMenu();
                         }
                     }

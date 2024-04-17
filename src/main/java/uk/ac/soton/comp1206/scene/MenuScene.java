@@ -9,9 +9,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
-import javafx.scene.text.Text;
-import javafx.scene.transform.Translate;
 import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,7 +18,6 @@ import uk.ac.soton.comp1206.ui.Multimedia;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 
 /**
  * The main menu of the game. Provides a gateway to the rest of the game.
@@ -134,9 +130,13 @@ public class MenuScene extends BaseScene {
 
     private void gotoinstructions(ActionEvent event){
         gameWindow.startinstructions();
+        multimedia.stopmusicplayer();
     }
 
-    private void gotomultiplayer(ActionEvent event){gameWindow.startlobby();}
+    private void gotomultiplayer(ActionEvent event){
+        multimedia.stopmusicplayer();
+        gameWindow.startlobby();
+    }
 
 
 }
