@@ -6,54 +6,86 @@ import javafx.util.Duration;
 
 import java.io.File;
 
+/** Multimedia is a class that allows the game to play sound effects/background music when called */
 public class Multimedia {
 
-    Media media;
+  /** Media class configured for each file */
+  Media media;
 
-    MediaPlayer audioplayer;
-    MediaPlayer musicplayer;
+  /** Plays audio */
+  MediaPlayer audioplayer;
 
-    public void setaudioplayer(Media media){
-        audioplayer = new MediaPlayer(media);
-        audioplayer.setAutoPlay(true);
+  /** Plays music */
+  MediaPlayer musicplayer;
 
-    }
+  /**
+   * Sets audio player to media and plays
+   *
+   * @param media media class
+   */
+  public void setaudioplayer(Media media) {
+    audioplayer = new MediaPlayer(media);
+    audioplayer.setAutoPlay(true);
+  }
 
-    public void playinloop(Media pmedia) {
-        media = pmedia;
-        musicplayer = new MediaPlayer(media);
-        musicplayer.setAutoPlay(true);
-        musicplayer.setOnEndOfMedia(new Runnable() {
-            @Override
-            public void run() {
-                musicplayer.seek(Duration.ZERO);
-                musicplayer.play();
-            }
+  /**
+   * Plays the passed in media on loop
+   *
+   * @param pmedia media class
+   */
+  public void playinloop(Media pmedia) {
+    media = pmedia;
+    musicplayer = new MediaPlayer(media);
+    musicplayer.setAutoPlay(true);
+    musicplayer.setOnEndOfMedia(
+        new Runnable() {
+          @Override
+          public void run() {
+            musicplayer.seek(Duration.ZERO);
+            musicplayer.play();
+          }
         });
-    }
+  }
 
-    public MediaPlayer getmusicplayer(Media media){
+  /**
+   * Returns media player with media defined
+   *
+   * @param media media class
+   * @return media player
+   */
+  public MediaPlayer getmusicplayer(Media media) {
     return new MediaPlayer(media);
-    }
+  }
 
+  /**
+   * Plays music in loop
+   *
+   * @param media media class
+   */
+  public void playmenumusic(Media media) {
+    playinloop(media);
+  }
 
-
-    public void playmenumusic(Media media){
-        playinloop(media);
-    }
-    public void playgamemusic(Media mediaone, Media mediatwo){
-        media = mediaone;
-        musicplayer = getmusicplayer(mediaone);
-        musicplayer.play();
-        musicplayer.setOnEndOfMedia(() -> {
-            musicplayer.stop(); // Stop the first media player
-            media=mediatwo;
-            playinloop(media); // Start playing the second media player
+  /**
+   * Given two media, play one until completion then play the other on loop
+   *
+   * @param mediaone media to play once
+   * @param mediatwo media to play on loop
+   */
+  public void playgamemusic(Media mediaone, Media mediatwo) {
+    media = mediaone;
+    musicplayer = getmusicplayer(mediaone);
+    musicplayer.play();
+    musicplayer.setOnEndOfMedia(
+        () -> {
+          musicplayer.stop(); // Stop the first media player
+          media = mediatwo;
+          playinloop(media); // Start playing the second media player
         });
+  }
 
-    }
-
-    public void stopmusicplayer(){
-        musicplayer.stop();
-    }
+  /** Stop player */
+  public void stopmusicplayer() {
+    musicplayer.stop();
+  }
 }

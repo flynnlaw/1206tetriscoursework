@@ -1,5 +1,6 @@
 package uk.ac.soton.comp1206.scene;
 
+import javafx.animation.FadeTransition;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -14,6 +15,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.paint.Color;
+import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.ac.soton.comp1206.component.PieceBoard;
@@ -26,24 +28,21 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
-/**
- * The Instructions Scene introduces the game to players, introducing the controls and the potential game pieces the players will encounter.
- */
-
-public class InstructionsScene extends BaseScene {
+/** The Intro Scene refines the game upon launch through the animation of a logo. */
+public class IntroScene extends BaseScene {
   Multimedia multimedia = new Multimedia();
 
-  private static final Logger logger = LogManager.getLogger(InstructionsScene.class);
+  private static final Logger logger = LogManager.getLogger(IntroScene.class);
 
   /**
-   * Create a new Instruction Scene
+   * Create a new Intro Scene
+   *
    * @param gameWindow the Game Window
    */
-  public InstructionsScene(GameWindow gameWindow) {
+  public IntroScene(GameWindow gameWindow) {
     super(gameWindow);
-    logger.info("Creating Menu Scene");
-    String path = "src/main/resources/music/menu.mp3";
-    String path1 = "src/main/resources/music/suiiianthem.mp3";
+    logger.info("Creating Intro Scene");
+    String path = "src/main/resources/sounds/intro.mp3";
     Media backgroundmusic = new Media(new File(path).toURI().toString());
     logger.info("playing background music");
     multimedia.playmenumusic(backgroundmusic);
@@ -57,50 +56,45 @@ public class InstructionsScene extends BaseScene {
     var menuPane = new StackPane();
     menuPane.setMaxWidth(gameWindow.getWidth());
     menuPane.setMaxHeight(gameWindow.getHeight());
-    menuPane.getStyleClass().add("menu-background");
+    menuPane.setStyle("-fx-background-color: black;");
     root.getChildren().add(menuPane);
     var mainPane = new BorderPane();
     menuPane.getChildren().add(mainPane);
     try {
-      Image tetrecsimage =
-          new Image(new FileInputStream("src/main/resources/images/Instructions.png"));
-      ImageView imageView = new ImageView();
-      imageView.setImage(tetrecsimage);
-      imageView.setPreserveRatio(true);
-      imageView.setFitHeight(400);
-      imageView.setFitWidth(gameWindow.getWidth());
-      menuPane.setAlignment(Pos.TOP_CENTER);
-      menuPane.getChildren().add(imageView);
-      imageView.setX(100.0);
+      // Load the image
+      Image ecsgamesimage =
+          new Image(new FileInputStream("src/main/resources/images/ECSGames.png"));
+      ImageView titleImage = new ImageView(ecsgamesimage);
+      titleImage.setPreserveRatio(true);
+      titleImage.setFitWidth(250);
 
+      // Position the image in the center
+      titleImage.setLayoutX((gameWindow.getWidth() - titleImage.getFitWidth()) / 2);
+      titleImage.setLayoutY((gameWindow.getHeight() - titleImage.getFitHeight()) / 2);
+
+      // Add the image to the black screen
+      mainPane.setCenter(titleImage);
+
+      // Fade in animation for the image
+      FadeTransition fadeIn = new FadeTransition(Duration.seconds(2), titleImage);
+      fadeIn.setFromValue(0);
+      fadeIn.setToValue(1);
+      fadeIn.play();
+
+      // Fade out animation for the image
+      FadeTransition fadeOut = new FadeTransition(Duration.seconds(2), titleImage);
+      fadeOut.setFromValue(1);
+      fadeOut.setToValue(0);
+      fadeOut.setDelay(Duration.seconds(2)); // Wait for 2 seconds before starting fade out
+
+      // After fade out, remove the black screen and show the rest of the menu
+      fadeOut.setOnFinished(
+          event -> {
+            gameWindow.startMenu();
+          });
+      fadeOut.play();
     } catch (FileNotFoundException e) {
-      throw new RuntimeException(e);
-    }
-    VBox vbox = new VBox();
-    HBox hbox = new HBox();
-    HBox hbox2 = new HBox();
-    hbox.setAlignment(Pos.CENTER);
-    hbox.setPadding(new Insets(0, 5, 5, 5));
-    hbox.setSpacing(5);
-    hbox2.setPadding(new Insets(0, 5, 5, 5));
-    hbox2.setSpacing(5);
-    hbox2.setAlignment(Pos.CENTER);
-    Label label = new Label("Example blocks: ");
-    label.getStyleClass().add("messages");
-    label.setTextFill(Color.WHITE);
-    vbox.getChildren().addAll(label, hbox, hbox2);
-    vbox.setMargin(label, new Insets(0, 0, 0, 340));
-    mainPane.setBottom(vbox);
-
-    for (int i = 0; i < 7; i++) {
-      PieceBoard piece =
-          new PieceBoard(new Grid(3, 3), gameWindow.getWidth() / 10, gameWindow.getWidth() / 10, i);
-      hbox.getChildren().add(piece);
-    }
-    for (int i = 7; i < 15; i++) {
-      PieceBoard piece =
-          new PieceBoard(new Grid(3, 3), gameWindow.getWidth() / 10, gameWindow.getWidth() / 10, i);
-      hbox2.getChildren().add(piece);
+      e.printStackTrace();
     }
   }
 

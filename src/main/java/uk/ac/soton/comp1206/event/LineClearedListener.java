@@ -6,7 +6,12 @@ import javafx.util.Pair;
 import java.util.HashSet;
 import java.util.Set;
 
-
+/**
+ * The Line Cleared Listener is called when a entire row/column of blocks is made in the game and is
+ * therefore has to be removed.
+ */
 public interface LineClearedListener {
-    void onLineCleared(Set<Pair<Integer, Integer>> blockstodelete);
+
+  /** Called when a line is cleared in the game */
+  void onLineCleared(Set<Pair<Integer, Integer>> blockstodelete);
 }
