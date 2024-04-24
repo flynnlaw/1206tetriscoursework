@@ -30,10 +30,12 @@ import java.util.*;
  */
 public class LobbyScene extends BaseScene {
 
-  /** Communicator instance for sending messages to the server*/
+  /** Communicator instance for sending messages to the server */
   Communicator communicator = gameWindow.getCommunicator();
-  /** VBox used for displaying available channels*/
+
+  /** VBox used for displaying available channels */
   VBox channelvbox = new VBox();
+
   /** Timer used for pinging the server every 5 seconds for new games */
   private Timeline updateTimer;
 
@@ -43,29 +45,37 @@ public class LobbyScene extends BaseScene {
   /** Set of channels that are open */
   private Set<String> openedChannels = new HashSet<>();
 
-  /** TextFlow for the chat within each channel*/
+  /** TextFlow for the chat within each channel */
   TextFlow chattextflow;
-  /** TextFlow for the usernames in each channel*/
+
+  /** TextFlow for the usernames in each channel */
   TextFlow usernames;
-  /** Allows the textflow to have a scrollbar when messages fill the textflow*/
+
+  /** Allows the textflow to have a scrollbar when messages fill the textflow */
   ScrollPane scroller;
-  /** BorderPane that chat window components are added to*/
+
+  /** BorderPane that chat window components are added to */
   BorderPane chatwindow;
+
   /** Nickname of the user of this client */
   String nickname;
-  /** Main Pane that all components are added to*/
+
+  /** Main Pane that all components are added to */
   BorderPane mainPane;
-  /** Value indicating whether the user is currently in a channel*/
+
+  /** Value indicating whether the user is currently in a channel */
   Boolean inchannel = false;
 
-  /** VBox housing the chat functions*/
+  /** VBox housing the chat functions */
   VBox chatboxvbox;
-  /** VBox holding the text input*/
+
+  /** VBox holding the text input */
   VBox bottomvbox;
-  /** HBox holding the game buttons*/
+
+  /** HBox holding the game buttons */
   HBox buttonhbox;
 
-  /** Button allowing the game to start*/
+  /** Button allowing the game to start */
   Button startgamebutton;
 
   private static final Logger logger = LogManager.getLogger(LobbyScene.class);
@@ -135,10 +145,7 @@ public class LobbyScene extends BaseScene {
     requestchannels();
   }
 
-  /**
-   * Starts the timer
-   * Every 5 seconds, it requests for new channels
-   */
+  /** Starts the timer Every 5 seconds, it requests for new channels */
   private void initializeTimer() {
     updateTimer =
         new Timeline(
@@ -159,7 +166,9 @@ public class LobbyScene extends BaseScene {
   }
 
   /**
-   * Adds channels passed in to the vbox, adds a listener to each added channel to open its chat window
+   * Adds channels passed in to the vbox, adds a listener to each added channel to open its chat
+   * window
+   *
    * @param channels channels received
    */
   public void addchannelstovbox(String[] channels) {
@@ -214,9 +223,9 @@ public class LobbyScene extends BaseScene {
 
   /**
    * Constructs a chat window for the channel passed in
+   *
    * @param channel the channel to join
    */
-
   public void makechatwindow(String channel) {
     chatwindow = new BorderPane();
     mainPane.setCenter(chatwindow);
@@ -313,13 +322,16 @@ public class LobbyScene extends BaseScene {
         });
 
     inchannel = true;
+    String path = "src/main/resources/sounds/message.wav";
+    Media messagerecieved = new Media(new File(path).toURI().toString());
+    multimedia.setaudioplayer(messagerecieved);
   }
 
   /**
    * Populates the usernames given in the passed in array into the username texeflow
+   *
    * @param users the users in the channel
    */
-
   public void fillusernames(String[] users) {
     Text usernameText;
     this.usernames.getChildren().clear();
@@ -339,7 +351,26 @@ public class LobbyScene extends BaseScene {
   }
 
   /**
+   * Removes text class from the usernames textflow when someone has left the lobby
+   *
+   * @param player the player to delete
+   */
+  public void removeUsername(String player) {
+    Iterator<Node> iterator = usernames.getChildren().iterator();
+    while (iterator.hasNext()) {
+      Node node = iterator.next();
+      if (node instanceof Text) {
+        Text text = (Text) node;
+        if (text.getText().trim().equals(player)) {
+          iterator.remove();
+        }
+      }
+    }
+  }
+
+  /**
    * Receives a message from the server and does a different function depending on the type.
+   *
    * @param message
    */
   public void receiveMessage(String message) {
@@ -407,12 +438,14 @@ public class LobbyScene extends BaseScene {
         gameWindow.startMultiplayerChallenge(communicator);
         multimedia.stopmusicplayer();
       }
+
+      case "DIE" -> {
+        removeUsername(commands[1]);
+      }
     }
   }
 
-  /** Initialise the scene and start the game
-   *  Handles keyboard inputs for escape
-   */
+  /** Initialise the scene and start the game Handles keyboard inputs for escape */
   @Override
   public void initialise() {
     scene.setOnKeyPressed(

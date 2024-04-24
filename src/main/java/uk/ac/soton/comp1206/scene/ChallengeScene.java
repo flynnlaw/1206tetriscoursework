@@ -6,6 +6,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.media.Media;
 import javafx.scene.paint.Color;
@@ -42,26 +43,28 @@ public class ChallengeScene extends BaseScene
 
   private static final Logger logger = LogManager.getLogger(ChallengeScene.class);
 
-  /** Game instance*/
+  /** Game instance */
   protected Game game;
+
   /** Multimedia instance to play audio/sound */
   Multimedia multimedia = new Multimedia();
 
-  /** Visual representation of pieceboard*/
+  /** Visual representation of pieceboard */
   protected PieceBoard pieceboard;
-  /** Visual representation of the next pieceboard*/
+
+  /** Visual representation of the next pieceboard */
   protected PieceBoard nextpieceboard;
 
-  /** Visual representation of main game board*/
+  /** Visual representation of main game board */
   protected GameBoard board;
 
-  /** The rectangle to be animated, representating the timer*/
+  /** The rectangle to be animated, representating the timer */
   protected Rectangle timerectangle;
 
-  /** TimeLine dictating the animation keyframes*/
+  /** TimeLine dictating the animation keyframes */
   protected Timeline timeline = new Timeline();
 
-  /** the main container for placing the components into*/
+  /** the main container for placing the components into */
   BorderPane mainPane = new BorderPane();
 
   /** Animation for the colour change of the timer rectangle */
@@ -159,6 +162,7 @@ public class ChallengeScene extends BaseScene
 
     // Handle block on gameboard grid being clicked
     board.setOnBlockClick(this::blockClicked);
+    board.setGame(game);
   }
 
   /**
@@ -178,9 +182,7 @@ public class ChallengeScene extends BaseScene
     game = new Game(5, 5);
   }
 
-  /** Initialise the scene and start the game
-   *  Handles keyboard inputs
-   */
+  /** Initialise the scene and start the game Handles keyboard inputs */
   @Override
   public void initialise() {
     logger.info("Initialising Challenge");
@@ -224,6 +226,9 @@ public class ChallengeScene extends BaseScene
             case SPACE:
             case R:
               game.swapcurrentpiece();
+              board.resethoveredstate();
+              board.makeblockhover(
+                  game.getGamePiece(), board.getSelectedCol(), board.getSelectedRow());
               break;
 
             case Q:
@@ -232,6 +237,9 @@ public class ChallengeScene extends BaseScene
               logger.info("q,z,[");
               pieceboard.emptygrid();
               game.rotatecurrentpiececlockwise();
+              board.resethoveredstate();
+              board.makeblockhover(
+                  game.getGamePiece(), board.getSelectedCol(), board.getSelectedRow());
               break;
 
             case E:
@@ -239,6 +247,9 @@ public class ChallengeScene extends BaseScene
             case CLOSE_BRACKET:
               pieceboard.emptygrid();
               game.rotatecurrentpiece();
+              board.resethoveredstate();
+              board.makeblockhover(
+                  game.getGamePiece(), board.getSelectedCol(), board.getSelectedRow());
               break;
           }
         });
@@ -246,40 +257,35 @@ public class ChallengeScene extends BaseScene
 
   /**
    * Empties the pieceboard and displays the piece in the visual pieceboard
+   *
    * @param piece piece to be displayed
    */
-
   @Override
   public void nextpiece(GamePiece piece) {
     pieceboard.emptygrid();
+    board.resethoveredstate();
     pieceboard.displaypiece(piece);
   }
 
   /**
    * Empties the nextpieceboard and displays the piece in the visual nextpieceboard
+   *
    * @param piece piece to be displayed
    */
-
   @Override
   public void followingpiece(GamePiece piece) {
     nextpieceboard.emptygrid();
     nextpieceboard.displaypiece(piece);
   }
 
-  /**
-   * Empties the pieceboard and rotates the piece
-   */
-
+  /** Empties the pieceboard and rotates the piece */
   @Override
   public void onRightClicked() {
     pieceboard.emptygrid();
     game.rotatecurrentpiece();
   }
 
-  /**
-   * Fades out the blocks when a line is cleared
-   */
-
+  /** Fades out the blocks when a line is cleared */
   @Override
   public void onLineCleared(Set<Pair<Integer, Integer>> blockstodelete) {
     board.fadeOut(blockstodelete);
@@ -287,9 +293,9 @@ public class ChallengeScene extends BaseScene
 
   /**
    * Resets the animated timer and resets its animation with the passed in delay
+   *
    * @param delay
    */
-
   @Override
   public void timerstarted(int delay) {
     logger.info("new timer started");
@@ -320,9 +326,9 @@ public class ChallengeScene extends BaseScene
 
   /**
    * Defines the timer, rectangle, and its associated animation
+   *
    * @param delay
    */
-
   @Override
   public void timercreated(int delay) {
     this.timerectangle = new Rectangle();
@@ -355,10 +361,7 @@ public class ChallengeScene extends BaseScene
     gameWindow.startscores(game);
   }
 
-  /**
-   * Gets the current highest local score and displays it in the scene
-   */
-
+  /** Gets the current highest local score and displays it in the scene */
   public int getHighScore() {
     try (BufferedReader reader =
         new BufferedReader(new FileReader("src/main/resources/localscores.txt"))) {
@@ -373,5 +376,13 @@ public class ChallengeScene extends BaseScene
       e.printStackTrace();
     }
     return 0; // Default value if file is empty or an error occurs
+  }
+
+  /**
+   * Returns current piece
+   * @return next piece to be placed in game
+   */
+  public GamePiece getCurrentPiece() {
+    return game.getGamePiece();
   }
 }

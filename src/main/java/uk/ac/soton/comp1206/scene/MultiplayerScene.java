@@ -30,9 +30,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The Multiplayer Scene is the same as the Challenge Scene, with a few changes to further aide with mutliplayer.
+ * The Multiplayer Scene is the same as the Challenge Scene, with a few changes to further aide with
+ * mutliplayer.
  */
-
 public class MultiplayerScene extends ChallengeScene {
 
   private static final Logger logger = LogManager.getLogger(MultiplayerScene.class);
@@ -40,19 +40,19 @@ public class MultiplayerScene extends ChallengeScene {
   /** Label for the in game chat */
   Label label;
 
-  /** Text input for sending messages to the in game chat*/
+  /** Text input for sending messages to the in game chat */
   TextField userinput;
 
-  /** Communicator to send messages to the server*/
+  /** Communicator to send messages to the server */
   Communicator communicator;
 
-  /** Custom component for showing the current scores of all active players*/
+  /** Custom component for showing the current scores of all active players */
   Leaderboard leaderboard;
 
-  /** VBox to hold the Leaderboard component*/
+  /** VBox to hold the Leaderboard component */
   VBox rightsidevbox;
 
-  /** VBox to hold the pieceboards*/
+  /** VBox to hold the pieceboards */
   VBox pieceboardvbox;
 
   /** Value to indicate whether the scores leaderboard has been initially built */
@@ -70,7 +70,6 @@ public class MultiplayerScene extends ChallengeScene {
     initiatenameandscores.add(new Pair<>("Example", 0));
     leaderboard = new Leaderboard(initiatenameandscores, "local", communicator);
   }
-
 
   /** Setup the game object and model */
   public void setupGame() {
@@ -165,10 +164,12 @@ public class MultiplayerScene extends ChallengeScene {
 
     // Handle block on gameboard grid being clicked
     board.setOnBlockClick(this::blockClicked);
+    board.setGame(game);
   }
 
   /**
    * Receives a message from the server and does a different function depending on the type.
+   *
    * @param message
    */
   public void receiveMessage(String message) {
@@ -204,6 +205,7 @@ public class MultiplayerScene extends ChallengeScene {
 
   /**
    * Empties the pieceboard and displays the piece in the visual pieceboard
+   *
    * @param piece piece to be displayed
    */
   @Override
@@ -212,13 +214,14 @@ public class MultiplayerScene extends ChallengeScene {
     pieceboard.displaypiece(piece);
   }
 
-  /** Send request for scores to the server*/
+  /** Send request for scores to the server */
   public void sendscores() {
     communicator.send("SCORES");
   }
 
-
-  /** Constructs an array of name and scores, then initialises a leaderboard and adds it to the scene*/
+  /**
+   * Constructs an array of name and scores, then initialises a leaderboard and adds it to the scene
+   */
   public void loadScores(String[] scores) {
     List<Pair<String, Integer>> nameandscores = new ArrayList<>();
     for (String line : scores) {
@@ -232,9 +235,7 @@ public class MultiplayerScene extends ChallengeScene {
     rightsidevbox.getChildren().addAll(leaderboard, pieceboardvbox);
   }
 
-  /** Initialise the scene and start the game
-   *  Handles keyboard inputs
-   */
+  /** Initialise the scene and start the game Handles keyboard inputs */
   @Override
   public void initialise() {
     logger.info("Initialising Challenge");
@@ -281,6 +282,9 @@ public class MultiplayerScene extends ChallengeScene {
             case SPACE:
             case R:
               game.swapcurrentpiece();
+              board.resethoveredstate();
+              board.makeblockhover(
+                  game.getGamePiece(), board.getSelectedCol(), board.getSelectedRow());
               break;
 
             case Q:
@@ -288,6 +292,9 @@ public class MultiplayerScene extends ChallengeScene {
             case OPEN_BRACKET:
               pieceboard.emptygrid();
               game.rotatecurrentpiececlockwise();
+              board.resethoveredstate();
+              board.makeblockhover(
+                  game.getGamePiece(), board.getSelectedCol(), board.getSelectedRow());
               break;
 
             case E:
@@ -295,6 +302,9 @@ public class MultiplayerScene extends ChallengeScene {
             case CLOSE_BRACKET:
               pieceboard.emptygrid();
               game.rotatecurrentpiece();
+              board.resethoveredstate();
+              board.makeblockhover(
+                  game.getGamePiece(), board.getSelectedCol(), board.getSelectedRow());
               break;
           }
         });
@@ -302,6 +312,7 @@ public class MultiplayerScene extends ChallengeScene {
 
   /**
    * Executes the score scene when the game ends
+   *
    * @param game
    */
   @Override

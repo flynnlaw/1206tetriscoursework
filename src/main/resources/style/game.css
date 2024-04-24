@@ -233,3 +233,15 @@ TextField {
     -fx-font-family: 'Orbitron';
     -fx-fill: white;
 }
+
+.buttonintro {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-fill: white;
+    -fx-font-family: 'Orbitron';
+    -fx-font-size: 32px;
+    -fx-font-weight: 900;
+    -fx-stroke: black;
+    -fx-effect: dropshadow(gaussian, black, 1, 1.0, 1, 1);
+}

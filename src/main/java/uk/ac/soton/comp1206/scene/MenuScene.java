@@ -11,6 +11,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.media.Media;
+import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -97,9 +98,20 @@ public class MenuScene extends BaseScene {
     vbox.setAlignment(Pos.TOP_CENTER);
     flowPane.getChildren().add(vbox);
 
-    singleplayerbutton.getStyleClass().add("title");
-    multiplayerbutton.getStyleClass().add("title");
-    instructionsbutton.getStyleClass().add("title");
+    singleplayerbutton.getStyleClass().add("buttonintro");
+    multiplayerbutton.getStyleClass().add("buttonintro");
+    instructionsbutton.getStyleClass().add("buttonintro");
+    singleplayerbutton.setTextFill(Color.WHITE);
+    multiplayerbutton.setTextFill(Color.WHITE);
+    instructionsbutton.setTextFill(Color.WHITE);
+    singleplayerbutton.setOnMouseEntered(
+        mouseEvent -> singleplayerbutton.setTextFill(Color.YELLOW));
+    multiplayerbutton.setOnMouseEntered(mouseEvent -> multiplayerbutton.setTextFill(Color.YELLOW));
+    instructionsbutton.setOnMouseEntered(
+        mouseEvent -> instructionsbutton.setTextFill(Color.YELLOW));
+    singleplayerbutton.setOnMouseExited(mouseEvent -> singleplayerbutton.setTextFill(Color.WHITE));
+    multiplayerbutton.setOnMouseExited(mouseEvent -> multiplayerbutton.setTextFill(Color.WHITE));
+    instructionsbutton.setOnMouseExited(mouseEvent -> instructionsbutton.setTextFill(Color.WHITE));
 
     // Bind the button action to the startGame method in the menu
     singleplayerbutton.setOnAction(this::startGame);
@@ -149,7 +161,6 @@ public class MenuScene extends BaseScene {
    *
    * @param event event
    */
-
   private void gotomultiplayer(ActionEvent event) {
     multimedia.stopmusicplayer();
     gameWindow.startlobby();

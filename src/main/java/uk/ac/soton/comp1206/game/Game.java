@@ -34,10 +34,10 @@ public class Game {
   /** The grid model linked to the game */
   protected final Grid grid;
 
-  /** Game representation of the pieceboard*/
+  /** Game representation of the pieceboard */
   protected final Grid pieceboard;
 
-  /** Game representation of the pieceboard storing the piece after the next one to be placed*/
+  /** Game representation of the pieceboard storing the piece after the next one to be placed */
   protected final Grid nextpieceboard;
 
   /** The listener to call when a piece is placed */
@@ -52,34 +52,42 @@ public class Game {
   /** Allows sound effects/background music to be played */
   Multimedia multimedia = new Multimedia();
 
-  /** Score property of the game*/
+  /** Score property of the game */
   SimpleIntegerProperty score = new SimpleIntegerProperty(0);
-  /** Level property of the game*/
+
+  /** Level property of the game */
   SimpleIntegerProperty level = new SimpleIntegerProperty(0);
-  /** Lives property of the game*/
-  SimpleIntegerProperty lives = new SimpleIntegerProperty(3);
-  /** Multiplier property of the game*/
+
+  /** Lives property of the game */
+  SimpleIntegerProperty lives = new SimpleIntegerProperty(999);
+
+  /** Multiplier property of the game */
   SimpleIntegerProperty multiplier = new SimpleIntegerProperty(1);
 
-  /** The next piece to be placed down*/
+  /** The next piece to be placed down */
   GamePiece currentPiece;
 
-  /** The piece that will be placed after the currentPiece*/
+  /** The piece that will be placed after the currentPiece */
   GamePiece followingPiece;
 
-  /** The path to the sound played when rotating a piece*/
+  /** The path to the sound played when rotating a piece */
   String rotatesoundpath = "src/main/resources/sounds/rotate.wav";
-  /** The path to the sound played when clearing a line*/
+
+  /** The path to the sound played when clearing a line */
   String clearsoundpath = "src/main/resources/sounds/clear.wav";
-  /** The path to the sound played when you fail in the game*/
+
+  /** The path to the sound played when you fail in the game */
   String failsoundpath = "src/main/resources/sounds/fail.wav";
-  /** The path to the sound played when a piece is placed*/
+
+  /** The path to the sound played when a piece is placed */
   String placesoundpath = "src/main/resources/sounds/place.wav";
-  /** The path to the sound played when you fully clear the board*/
+
+  /** The path to the sound played when you fully clear the board */
   String suiiisoundpath = "src/main/resources/sounds/suiii-loud.mp3";
 
-  /** Media pertaining to each path*/
+  /** Media pertaining to each path */
   Media rotatesound = new Media(new File(rotatesoundpath).toURI().toString());
+
   Media clearsound = new Media(new File(clearsoundpath).toURI().toString());
   Media failsound = new Media(new File(failsoundpath).toURI().toString());
   Media placesound = new Media(new File(placesoundpath).toURI().toString());
@@ -117,7 +125,7 @@ public class Game {
     followingPiece = spawnPiece();
     updatepieceboard(currentPiece);
     nextPieceListener.followingpiece(followingPiece);
-    //        starttimer();
+    starttimer();
     if (gameLoopListener != null) {
       gameLoopListener.timercreated(getTimerDelay());
     }
@@ -157,9 +165,9 @@ public class Game {
 
   /**
    * Update the games representation of the pieceboard
+   *
    * @param gamePiece the game piece to place onto the pieceboard
    */
-
   public void updatepieceboard(GamePiece gamePiece) {
     int[][] pieceshape = gamePiece.getBlocks();
     for (int x = 0; x < 3; x++) {
@@ -171,10 +179,9 @@ public class Game {
     }
   }
 
-
-
   /**
    * Generates a random new piece to be placed
+   *
    * @return the generated game piece
    */
   public GamePiece spawnPiece() {
@@ -187,10 +194,9 @@ public class Game {
   }
 
   /**
-   * Updates the pieces in the game with new pieces after a piece has been placed
-   * Further pings the challenge scene to update the visualisation of the pieceboards.
+   * Updates the pieces in the game with new pieces after a piece has been placed Further pings the
+   * challenge scene to update the visualisation of the pieceboards.
    */
-
   public void nextPiece() {
     currentPiece = followingPiece;
     followingPiece = spawnPiece();
@@ -201,10 +207,9 @@ public class Game {
   }
 
   /**
-   * Calculates the rows and blocks to delete from the grid, and updates the score, level and mutliplier of the game.
-   * Further notifies the challenge scene to fade out each block
+   * Calculates the rows and blocks to delete from the grid, and updates the score, level and
+   * mutliplier of the game. Further notifies the challenge scene to fade out each block
    */
-
   public void afterPiece() {
     HashSet<Integer> rowstodelete = new HashSet<>();
     HashSet<Integer> columnstodelete = new HashSet<>();
@@ -257,10 +262,7 @@ public class Game {
     }
   }
 
-  /**
-   * Check the grid is empty
-   */
-
+  /** Check the grid is empty */
   public void checkempty() {
     int count = 0;
     for (int x = 0; x < 5; x++) {
@@ -278,9 +280,9 @@ public class Game {
 
   /**
    * Counts the number of full rows in the game grid
+   *
    * @param rowstodelete Set of rows to delete
    */
-
   public void countrows(HashSet<Integer> rowstodelete) {
     int count = 0;
     for (int x = 0; x < 5; x++) {
@@ -299,9 +301,9 @@ public class Game {
 
   /**
    * Counts the number of full columns in the game grid
+   *
    * @param columnstodelete Set of columns to delete
    */
-
   public void countcolumns(HashSet<Integer> columnstodelete) {
     int count = 0;
     for (int x = 0; x < 5; x++) {
@@ -320,6 +322,7 @@ public class Game {
 
   /**
    * Given a number of lines and individual blocks deleted, uodates the score accordingly.
+   *
    * @param nolines number of lines
    * @param noblocks number of blocks
    */
@@ -328,10 +331,9 @@ public class Game {
   }
 
   /**
-   * Swaps the piece held in the pieceboard with the piece held in the nextpieceboard
-   * Further pings the challenge scene to swap their representations.
+   * Swaps the piece held in the pieceboard with the piece held in the nextpieceboard Further pings
+   * the challenge scene to swap their representations.
    */
-
   public void swapcurrentpiece() {
     multimedia.setaudioplayer(rotatesound);
     pieceboard.emptygrid();
@@ -345,10 +347,9 @@ public class Game {
   }
 
   /**
-   * Rotates the piece in the games grid anticlockwise
-   * Further pings the challenge scene to rotate its representation as well.
+   * Rotates the piece in the games grid anticlockwise Further pings the challenge scene to rotate
+   * its representation as well.
    */
-
   public void rotatecurrentpiece() {
     multimedia.setaudioplayer(rotatesound);
     currentPiece.rotate();
@@ -356,23 +357,20 @@ public class Game {
   }
 
   /**
-   * Rotates the piece in the games grid clockwise
-   * Further pings the challenge scene to rotate its representation as well.
+   * Rotates the piece in the games grid clockwise Further pings the challenge scene to rotate its
+   * representation as well.
    */
-
   public void rotatecurrentpiececlockwise() {
     multimedia.setaudioplayer(rotatesound);
     currentPiece.rotateClockwise();
     pieceboard.changedisplayedpiece(currentPiece);
   }
 
-
-
   /**
    * Gets the current length of the timer according to current level.
+   *
    * @return delau of timer
    */
-
   public int getTimerDelay() {
     int delay = 12000 - (500 * level.getValue());
     if (delay < 2500) {
@@ -382,10 +380,8 @@ public class Game {
   }
 
   /**
-   * Starts a new timer, with length of the delay
-   * When it runs out it calls the gameLoop() method
+   * Starts a new timer, with length of the delay When it runs out it calls the gameLoop() method
    */
-
   public void starttimer() {
     timer = new Timer();
     timer.scheduleAtFixedRate(
@@ -399,10 +395,7 @@ public class Game {
         1);
   }
 
-  /**
-   * Resets the timer
-   */
-
+  /** Resets the timer */
   public void stoptimer() {
     if (timer != null) {
       timer.cancel();
@@ -410,10 +403,11 @@ public class Game {
     }
   }
 
-  /** Decrements lives, resets mutliplier to 1, changes the piece, and resets the timer
-   * Further pings the challenge scene to reset the timer animation
-   * If the user runs out of lives, it will stop the game and load the scores scene
-   * */
+  /**
+   * Decrements lives, resets mutliplier to 1, changes the piece, and resets the timer Further pings
+   * the challenge scene to reset the timer animation If the user runs out of lives, it will stop
+   * the game and load the scores scene
+   */
   public void gameLoop() {
     if (lives.get() - 1 < 0) {
       stoptimer();
@@ -450,18 +444,18 @@ public class Game {
 
   /**
    * Get the games representation of the pieceboard
+   *
    * @return pieceboard grid
    */
-
   public Grid getPieceboard() {
     return pieceboard;
   }
 
   /**
    * Gets the games representation of the pieceboard holding the piece after the current piece.
+   *
    * @return next pieceboard grid
    */
-
   public Grid getnextpieceboard() {
     return nextpieceboard;
   }
@@ -486,6 +480,7 @@ public class Game {
 
   /**
    * Get the current score in the game
+   *
    * @return score
    */
   public SimpleIntegerProperty getScore() {
@@ -494,6 +489,7 @@ public class Game {
 
   /**
    * Get the current level in the game
+   *
    * @return level
    */
   public SimpleIntegerProperty getLevel() {
@@ -502,10 +498,15 @@ public class Game {
 
   /**
    * Get the current lives in the game
+   *
    * @return lives
    */
   public SimpleIntegerProperty getLives() {
     return lives;
+  }
+
+  public GamePiece getGamePiece() {
+    return currentPiece;
   }
 
   /**
@@ -513,7 +514,6 @@ public class Game {
    *
    * @param nextPieceListener listener to add
    */
-
   public void setNextPieceListener(NextPieceListener nextPieceListener) {
     this.nextPieceListener = nextPieceListener;
   }
@@ -523,7 +523,6 @@ public class Game {
    *
    * @param lineClearedListener listener to add
    */
-
   public void setLineClearedListener(LineClearedListener lineClearedListener) {
     this.lineClearedListener = lineClearedListener;
   }
@@ -533,7 +532,6 @@ public class Game {
    *
    * @param gameLoopListener listener to add
    */
-
   public void setGameLoopListener(GameLoopListener gameLoopListener) {
     this.gameLoopListener = gameLoopListener;
   }

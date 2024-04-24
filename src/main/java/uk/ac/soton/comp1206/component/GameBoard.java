@@ -11,6 +11,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.ac.soton.comp1206.event.BlockClickedListener;
 import uk.ac.soton.comp1206.event.RightClickedListener;
+import uk.ac.soton.comp1206.game.Game;
+import uk.ac.soton.comp1206.game.GamePiece;
 import uk.ac.soton.comp1206.game.Grid;
 
 import java.util.HashSet;
@@ -55,10 +57,13 @@ public class GameBoard extends GridPane {
   /** The listener to call when the pieceboard is rightclicked */
   private RightClickedListener rightClickedListener;
 
+  /** Game instance used only for getting the current piece */
+  private Game game;
 
-  /** Row selected by keyboard binds*/
+  /** Row selected by keyboard binds */
   int selectedRow = 0;
-  /** Column selected by keyboard binds*/
+
+  /** Column selected by keyboard binds */
   int selectedCol = 0;
 
   /**
@@ -111,6 +116,15 @@ public class GameBoard extends GridPane {
     return blocks[x][y];
   }
 
+  /**
+   * Sets game instance so current piece can be accessed.
+   *
+   * @param game game instance
+   */
+  public void setGame(Game game) {
+    this.game = game;
+  }
+
   /** Build the GameBoard by creating a block at every x and y column and row */
   protected void build() {
     logger.info("Building grid: {} x {}", cols, rows);
@@ -153,8 +167,8 @@ public class GameBoard extends GridPane {
 
     // Add a mouse click handler to the block to trigger GameBoard blockClicked method
     block.setOnMouseClicked((e) -> blockClicked(e, block));
-    block.setOnMouseEntered(mouseEvent -> block.hover());
-    block.setOnMouseExited(mouseEvent -> block.exited());
+    block.setOnMouseEntered(mouseEvent -> selectBlock(block.getX(), block.getY()));
+    block.setOnMouseExited(mouseEvent -> resethoveredstate());
 
     return block;
   }
@@ -193,9 +207,9 @@ public class GameBoard extends GridPane {
 
   /**
    * Triggered when the pieceboard(s) are clicked. Call the attached listener.
+   *
    * @param event the mouse event
    */
-
   private void handleRightClick(MouseEvent event) {
     if (rightClickedListener != null) {
       rightClickedListener.onRightClicked();
@@ -208,7 +222,6 @@ public class GameBoard extends GridPane {
    *
    * @param blockstodelete set of indivdual blockstodelete (+therefore fade out)
    */
-
   public void fadeOut(Set<Pair<Integer, Integer>> blockstodelete) {
     for (Pair<Integer, Integer> block : blockstodelete) {
       getBlock(block.getKey(), block.getValue()).fadeOut();
@@ -217,36 +230,36 @@ public class GameBoard extends GridPane {
 
   /**
    * Returns number of columns
+   *
    * @return number of columns
    */
-
   public double getCols() {
     return cols;
   }
 
   /**
    * Returns number of rows
+   *
    * @return number of rows
    */
-
   public double getRows() {
     return rows;
   }
 
   /**
    * Returns the gameboard width
+   *
    * @return the width of gameboard
    */
-
   public double getgameboardwidth() {
     return width;
   }
 
   /**
    * Returns the gameboard height
+   *
    * @return the height of gameboard
    */
-
   public double getgameboardheight() {
     return height;
   }
@@ -257,7 +270,6 @@ public class GameBoard extends GridPane {
    * @param deltaX moves selected block by deltaX
    * @param deltaY moves selected block by deltaY
    */
-
   public void moveSelection(int deltaX, int deltaY) {
     // Calculate the new row and column index for the selection
     int newRow = Math.max(0, Math.min(rows - 1, selectedRow + deltaY));
@@ -276,33 +288,65 @@ public class GameBoard extends GridPane {
    * @param col column selected
    * @param row row selected
    */
-
   private void selectBlock(int col, int row) {
     // Highlight the selected block or perform any other selection-related action
-    blocks[col][row].hover();
+    makeblockhover(game.getGamePiece(), col, row);
     selectedCol = col;
     selectedRow = row;
   }
 
-  /**
-   * When the block is exited, the exited method is called.
-   */
-
+  /** When the block is exited, the exited method is called. */
   private void clearSelection() {
     // Clear the highlight from the currently selected block
     if (selectedCol >= 0 && selectedRow >= 0 && selectedCol < cols && selectedRow < rows) {
-      blocks[selectedCol][selectedRow].exited();
+      resethoveredstate();
     }
   }
 
-  /** Returns the selected row*/
-
+  /** Returns the selected row */
   public int getSelectedRow() {
     return selectedRow;
   }
 
-  /** Returns the selected column*/
+  /** Returns the selected column */
   public int getSelectedCol() {
     return selectedCol;
+  }
+
+  /**
+   * Displays a visual representation of where the block is to be placed
+   *
+   * @param gamePiece piece to be displayed
+   * @param x x coordinate of selected block
+   * @param y y coordinate of selected block
+   */
+  public void makeblockhover(GamePiece gamePiece, int x, int y) {
+    if (game != null && game.getGamePiece() != null) {
+      boolean playable = grid.canPlayPiece(gamePiece, x, y);
+      logger.info(playable);
+      int[][] pieceshape = gamePiece.getBlocks();
+      for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+          if (!(pieceshape[i][j] == 0)) {
+            int positionx = i - 1;
+            int positiony = j - 1;
+            try {
+              blocks[x + positionx][y + positiony].hover(gamePiece, playable);
+            } catch (IndexOutOfBoundsException e) {
+              continue;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /** Resets all blocks in the board to neutral */
+  public void resethoveredstate() {
+    for (int i = 0; i < 5; i++) {
+      for (int j = 0; j < 5; j++) {
+        blocks[i][j].exited();
+      }
+    }
   }
 }

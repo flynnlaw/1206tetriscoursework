@@ -1,6 +1,7 @@
 package uk.ac.soton.comp1206.component;
 
 import javafx.animation.AnimationTimer;
+import javafx.animation.FadeTransition;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ObservableValue;
@@ -8,8 +9,10 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.effect.*;
 import javafx.scene.paint.*;
+import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import uk.ac.soton.comp1206.game.GamePiece;
 
 /**
  * The Visual User Interface component representing a single block in the grid.
@@ -62,7 +65,13 @@ public class GameBlock extends Canvas {
   /** Graphics for block */
   GraphicsContext gc = getGraphicsContext2D();
 
+  /** Whether a middle dot should be drawn on the block */
   boolean middleDot;
+
+  /** Transitions for the fading in and fading out of potential piece placement */
+  FadeTransition fadeInTransition;
+
+  FadeTransition fadeOutTransition;
 
   /**
    * Create a new single Game Block
@@ -121,6 +130,7 @@ public class GameBlock extends Canvas {
 
     // Clear
     gc.clearRect(0, 0, width, height);
+    setOpacity(1);
 
     // Fill
     gc.setFill(Color.BLACK.deriveColor(0, 1, 1, 0.38));
@@ -138,6 +148,12 @@ public class GameBlock extends Canvas {
    * @param colour the colour to paint
    */
   private void paintColor(Paint colour) {
+    if (fadeInTransition != null) {
+      fadeInTransition.stop();
+    }
+    if (fadeOutTransition != null) {
+      fadeOutTransition.stop();
+    }
 
     // Clear
     gc.clearRect(0, 0, width, height);
@@ -147,6 +163,7 @@ public class GameBlock extends Canvas {
       gc.setFill(colour);
       // gc.setFill(Color.LIGHTBLUE);
       gc.fillRect(0, 0, width, height);
+      setOpacity(1);
 
       // Slighty lighter shade
       gc.setFill(Color.color(1, 1, 1, 0.2));
@@ -175,29 +192,50 @@ public class GameBlock extends Canvas {
   }
 
   /**
-   * Updates the colour of the block to be more oqaque for hover indication
+   * Updates the colour of the block to be more oqaque for hover indication Also fades the colour of
+   * the block in and out
    *
    * @param colour the colour to paint
    */
-  private void paintHoveredColor(Paint colour) {
-
+  private void paintHoveredColor(Paint colour, boolean playable) {
     // Clear
     gc.clearRect(0, 0, width, height);
 
-    // Colour fill
-    if (colour.equals(Color.TRANSPARENT)) {
-      gc.setFill(Color.WHITE.deriveColor(0, 1, 1, 0.38));
+    // Create FadeTransitions for fading in and out
+    fadeInTransition = new FadeTransition(Duration.millis(1000), this);
+    fadeInTransition.setFromValue(0.38); // Starting opacity
+    fadeInTransition.setToValue(1); // Ending opacity
+    fadeInTransition.setAutoReverse(true); // Fade in and out continuously
+    fadeInTransition.setCycleCount(FadeTransition.INDEFINITE); // Repeat indefinitely
+
+    fadeOutTransition = new FadeTransition(Duration.millis(1000), this);
+    fadeOutTransition.setFromValue(1); // Starting opacity
+    fadeOutTransition.setToValue(0.38); // Ending opacity
+    fadeOutTransition.setAutoReverse(true); // Fade in and out continuously
+    fadeOutTransition.setCycleCount(FadeTransition.INDEFINITE); // Repeat indefinitely
+
+    // If the block is not playable, adjust the color to be more red
+    if (!playable) {
+      gc.setFill(Color.rgb(255, 0, 0, 0.2)); // Semi-transparent red
+      gc.fillRect(0, 0, width, height);
     } else {
-      Color color = (Color) colour;
-      gc.setFill(color.deriveColor(0, 0.3, 1, 1));
+      // Apply hover effect to the original color
+      Color originalColor = (Color) colour;
+      Color hoveredColor =
+          originalColor.deriveColor(0, 0.3, 1, 0.6); // Adjust the hover effect as needed
+      gc.setFill(hoveredColor);
+      // Start both fade in and fade out transitions
+
     }
 
-    //        gc.setFill(Color.LIGHTBLUE);
+    // Fill the rectangle
     gc.fillRect(0, 0, width, height);
 
-    // Border
+    // Draw the border
     gc.setStroke(Color.GREY);
     gc.strokeRect(0, 0, width, height);
+    fadeInTransition.play();
+    fadeOutTransition.play();
   }
 
   /**
@@ -238,12 +276,18 @@ public class GameBlock extends Canvas {
   }
 
   /** Paint the hovered colour on the GameBlock */
-  public void hover() {
-    paintHoveredColor(COLOURS[value.get()]);
+  public void hover(GamePiece piece, boolean playable) {
+    paintHoveredColor(COLOURS[piece.getValue()], playable);
   }
 
-  /** Reset the colour back to original after the block is exited */
+  /** Reset the colour back to original after the block is exited Stops all animations */
   public void exited() {
+    if (fadeInTransition != null) {
+      fadeInTransition.stop();
+    }
+    if (fadeOutTransition != null) {
+      fadeOutTransition.stop();
+    }
     paintColor(COLOURS[value.get()]);
   }
 
@@ -278,10 +322,5 @@ public class GameBlock extends Canvas {
           }
         };
     timer.start();
-  }
-
-  public void addDot() {
-    gc.setFill(Color.color(1, 1, 1, 0.7));
-    gc.fillOval(width / 4, height / 4, width / 2, height / 2);
   }
 }
