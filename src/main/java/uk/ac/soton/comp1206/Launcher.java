@@ -6,6 +6,9 @@ package uk.ac.soton.comp1206;
  */
 public class Launcher {
 
+  /**Default constructor*/
+  public Launcher(){}
+
   /**
    * Launch the JavaFX Application, passing through the commandline arguments
    *

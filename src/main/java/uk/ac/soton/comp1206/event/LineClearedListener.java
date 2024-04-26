@@ -12,6 +12,8 @@ import java.util.Set;
  */
 public interface LineClearedListener {
 
-  /** Called when a line is cleared in the game */
+  /** Called when a line is cleared in the game
+   * @param blockstodelete set of indivdual blocks to fade out
+   */
   void onLineCleared(Set<Pair<Integer, Integer>> blockstodelete);
 }

@@ -148,6 +148,7 @@ public class GameBoard extends GridPane {
    *
    * @param x column
    * @param y row
+   * @return created block
    */
   protected GameBlock createBlock(int x, int y) {
     var blockWidth = width / cols;
@@ -213,7 +214,7 @@ public class GameBoard extends GridPane {
   private void handleRightClick(MouseEvent event) {
     if (rightClickedListener != null) {
       rightClickedListener.onRightClicked();
-      logger.info("clck");
+      logger.info("Piece rotated");
     }
   }
 
@@ -303,12 +304,16 @@ public class GameBoard extends GridPane {
     }
   }
 
-  /** Returns the selected row */
+  /** Returns the selected row
+   * @return row
+   */
   public int getSelectedRow() {
     return selectedRow;
   }
 
-  /** Returns the selected column */
+  /** Returns the selected column
+   * @return column
+   */
   public int getSelectedCol() {
     return selectedCol;
   }
@@ -323,7 +328,6 @@ public class GameBoard extends GridPane {
   public void makeblockhover(GamePiece gamePiece, int x, int y) {
     if (game != null && game.getGamePiece() != null) {
       boolean playable = grid.canPlayPiece(gamePiece, x, y);
-      logger.info(playable);
       int[][] pieceshape = gamePiece.getBlocks();
       for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {

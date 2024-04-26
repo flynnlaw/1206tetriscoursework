@@ -7,6 +7,7 @@ import javafx.util.Pair;
 import uk.ac.soton.comp1206.network.Communicator;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -18,8 +19,9 @@ public class Leaderboard extends ScoreList {
   /** Communicator instance for sending and receiving messages from the server */
   private final Communicator communicator;
   /** List of players that have ended their game*/
-  private final ArrayList<String> deadPeople = new ArrayList<>();
+  private final HashSet<String> deadPeople = new HashSet<>();
 
+  List<Pair<String, Integer>> entries = new ArrayList<>();
   /**
    * Create a new Leaderboard
    * @param scoresList list of name, score pairs
@@ -54,11 +56,16 @@ public class Leaderboard extends ScoreList {
    * @param namesAndScores name, score pairs
    */
   public void changescores(String[] namesAndScores) {
-    List<Pair<String, Integer>> entries = new ArrayList<>();
+    getChildren().clear();
+    entries.clear();
     for (String line : namesAndScores) {
       String[] parts = line.split(":");
       String player = parts[0];
       int score = Integer.parseInt(parts[1]);
+      var lives = parts[2];
+      if(lives.equals("DEAD")){
+        deadPeople.add(parts[0]);
+      }
       entries.add(new Pair<>(player, score));
     }
     entries.sort((entry1, entry2) -> entry2.getValue() - entry1.getValue());
@@ -66,8 +73,12 @@ public class Leaderboard extends ScoreList {
     int colour = 0;
     for (Pair<String, Integer> score : entries) {
       Text text = new Text(score.getKey() + ": " + score.getValue());
+      if (deadPeople.contains(score.getKey())) {
+        text.setStrikethrough(true);
+      } else {
+        text.setFill(COLOURS[colour]);
+      }
       text.getStyleClass().add("scorelist");
-      text.setFill(COLOURS[colour]);
       getChildren().add(text);
       colour++;
     }
@@ -82,7 +93,7 @@ public class Leaderboard extends ScoreList {
 
     // Re-add entries based on the updated scores list
     int colour = 0;
-    for (Pair<String, Integer> score : scores) {
+    for (Pair<String, Integer> score : entries) {
       Text text = new Text(score.getKey() + ": " + score.getValue());
       text.getStyleClass().add("scorelist");
       if (deadPeople.contains(score.getKey())) {
@@ -124,6 +135,6 @@ public class Leaderboard extends ScoreList {
    */
   @Override
   public List<Pair<String, Integer>> getScoreslist() {
-    return super.getScoreslist();
+    return entries;
   }
 }

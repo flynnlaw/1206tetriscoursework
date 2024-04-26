@@ -45,7 +45,7 @@ public class IntroScene extends BaseScene {
     String path = "src/main/resources/sounds/intro.mp3";
     Media backgroundmusic = new Media(new File(path).toURI().toString());
     logger.info("playing background music");
-    multimedia.playmenumusic(backgroundmusic);
+    multimedia.setaudioplayer(backgroundmusic);
   }
 
   /** Build the Instructions window */

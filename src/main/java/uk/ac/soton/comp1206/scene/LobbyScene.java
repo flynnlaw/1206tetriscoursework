@@ -371,7 +371,7 @@ public class LobbyScene extends BaseScene {
   /**
    * Receives a message from the server and does a different function depending on the type.
    *
-   * @param message
+   * @param message message received
    */
   public void receiveMessage(String message) {
 

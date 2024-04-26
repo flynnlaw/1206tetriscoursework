@@ -1,3 +1,4 @@
+/**Module info*/
 module uk.ac.soton.comp1206 {
     requires java.scripting;
     requires javafx.controls;

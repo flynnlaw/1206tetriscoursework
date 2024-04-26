@@ -73,6 +73,8 @@ public class GameBlock extends Canvas {
 
   FadeTransition fadeOutTransition;
 
+  FadeTransition colourFade;
+
   /**
    * Create a new single Game Block
    *
@@ -81,6 +83,7 @@ public class GameBlock extends Canvas {
    * @param y the row the block exists in
    * @param width the width of the canvas to render
    * @param height the height of the canvas to render
+   * @param middleDot whether to draw a middle dot or not
    */
   public GameBlock(
       GameBoard gameBoard, int x, int y, double width, double height, boolean middleDot) {
@@ -148,6 +151,7 @@ public class GameBlock extends Canvas {
    * @param colour the colour to paint
    */
   private void paintColor(Paint colour) {
+    gc = getGraphicsContext2D();
     if (fadeInTransition != null) {
       fadeInTransition.stop();
     }
@@ -198,8 +202,8 @@ public class GameBlock extends Canvas {
    * @param colour the colour to paint
    */
   private void paintHoveredColor(Paint colour, boolean playable) {
-    // Clear
-    gc.clearRect(0, 0, width, height);
+
+    gc = this.getGraphicsContext2D();
 
     // Create FadeTransitions for fading in and out
     fadeInTransition = new FadeTransition(Duration.millis(1000), this);
@@ -212,7 +216,7 @@ public class GameBlock extends Canvas {
     fadeOutTransition.setFromValue(1); // Starting opacity
     fadeOutTransition.setToValue(0.38); // Ending opacity
     fadeOutTransition.setAutoReverse(true); // Fade in and out continuously
-    fadeOutTransition.setCycleCount(FadeTransition.INDEFINITE); // Repeat indefinitely
+    fadeOutTransition.setCycleCount(FadeTransition.INDEFINITE);// Repeat indefinitely
 
     // If the block is not playable, adjust the color to be more red
     if (!playable) {
@@ -275,8 +279,12 @@ public class GameBlock extends Canvas {
     value.bind(input);
   }
 
-  /** Paint the hovered colour on the GameBlock */
+  /** Paint the hovered colour on the GameBlock
+   * @param piece piece to hover
+   * @param playable whether the piece can be played or not
+   */
   public void hover(GamePiece piece, boolean playable) {
+    paint();
     paintHoveredColor(COLOURS[piece.getValue()], playable);
   }
 

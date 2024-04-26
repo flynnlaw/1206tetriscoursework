@@ -18,6 +18,9 @@ public class Multimedia {
   /** Plays music */
   MediaPlayer musicplayer;
 
+  /**Default constructor*/
+  public Multimedia(){}
+
   /**
    * Sets audio player to media and plays
    *

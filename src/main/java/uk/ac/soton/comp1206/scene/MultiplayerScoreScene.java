@@ -36,6 +36,8 @@ public class MultiplayerScoreScene extends ScoresScene {
   /**
    * Create a new Multiplayer Score Scene
    * @param gameWindow the game Window
+   * @param game game instance
+   * @param scores scores to load
    */
   public MultiplayerScoreScene(
       GameWindow gameWindow, Game game, List<Pair<String, Integer>> scores) {

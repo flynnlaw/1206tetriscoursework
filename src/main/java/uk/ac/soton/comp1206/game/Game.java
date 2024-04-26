@@ -59,7 +59,7 @@ public class Game {
   SimpleIntegerProperty level = new SimpleIntegerProperty(0);
 
   /** Lives property of the game */
-  SimpleIntegerProperty lives = new SimpleIntegerProperty(999);
+  SimpleIntegerProperty lives = new SimpleIntegerProperty(3);
 
   /** Multiplier property of the game */
   SimpleIntegerProperty multiplier = new SimpleIntegerProperty(1);
@@ -149,7 +149,7 @@ public class Game {
     }
 
     if (grid.canPlayPiece(currentPiece, x, y)) {
-      logger.info("piece true");
+      logger.info("piece is playable");
       grid.playPiece(currentPiece, x, y);
       multimedia.setaudioplayer(placesound);
       nextPiece();
@@ -293,7 +293,7 @@ public class Game {
       }
       if (count == 5) {
         rowstodelete.add(x);
-        logger.info("added" + x + "row to delete");
+        logger.info("deleted row "+x);
       }
       count = 0;
     }
@@ -314,7 +314,7 @@ public class Game {
       }
       if (count == 5) {
         columnstodelete.add(x);
-        logger.info("added" + x + "column to delete");
+        logger.info("deleted column "+x);
       }
       count = 0;
     }
@@ -338,7 +338,7 @@ public class Game {
     multimedia.setaudioplayer(rotatesound);
     pieceboard.emptygrid();
     nextpieceboard.emptygrid();
-    logger.info("next piece grid clicked");
+    logger.info("Piece swapped");
     GamePiece temp = currentPiece;
     currentPiece = followingPiece;
     followingPiece = temp;
@@ -505,6 +505,10 @@ public class Game {
     return lives;
   }
 
+  /**
+   * Return the current piece in game
+   * @return current piece
+   */
   public GamePiece getGamePiece() {
     return currentPiece;
   }

@@ -19,9 +19,9 @@ public class PieceBoard extends GameBoard {
   /**
    * Creates a new Pieceboard, given off a given grid, width and height.
    *
-   * @param grid
-   * @param width
-   * @param height
+   * @param grid grid to base board off
+   * @param width width of board
+   * @param height height of board
    */
   public PieceBoard(Grid grid, double width, double height) {
     super(grid, width, height);
@@ -31,9 +31,10 @@ public class PieceBoard extends GameBoard {
    * Creates a new Pieceboard, given off a given grid, width, height and value Then fills the
    * pieceboard with the piece specified.
    *
-   * @param grid
-   * @param width
-   * @param height
+   * @param grid grid to base board off
+   * @param width width of board
+   * @param height height of board
+   * @param value value of piece to load into board
    */
   public PieceBoard(Grid grid, double width, double height, int value) {
     super(grid, width, height);

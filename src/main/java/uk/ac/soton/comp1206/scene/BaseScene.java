@@ -9,9 +9,14 @@ import uk.ac.soton.comp1206.ui.GameWindow;
 /** A Base Scene used in the game. Handles common functionality between all scenes. */
 public abstract class BaseScene {
 
+  /**
+   * Game Window instance
+   */
   protected final GameWindow gameWindow;
 
+  /** Inherited StackPane to add background to */
   protected GamePane root;
+  /** Current scene in game*/
   protected Scene scene;
 
   /**

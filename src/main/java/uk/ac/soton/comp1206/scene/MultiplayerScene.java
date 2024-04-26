@@ -62,6 +62,7 @@ public class MultiplayerScene extends ChallengeScene {
    * Create a new Multi Player challenge scene
    *
    * @param gameWindow the Game Window
+   * @param communicator communicator instance
    */
   public MultiplayerScene(GameWindow gameWindow, Communicator communicator) {
     super(gameWindow);
@@ -69,6 +70,7 @@ public class MultiplayerScene extends ChallengeScene {
     List<Pair<String, Integer>> initiatenameandscores = new ArrayList<>();
     initiatenameandscores.add(new Pair<>("Example", 0));
     leaderboard = new Leaderboard(initiatenameandscores, "local", communicator);
+    leaderboard.setAlignment(Pos.CENTER);
   }
 
   /** Setup the game object and model */
@@ -170,7 +172,7 @@ public class MultiplayerScene extends ChallengeScene {
   /**
    * Receives a message from the server and does a different function depending on the type.
    *
-   * @param message
+   * @param message message received
    */
   public void receiveMessage(String message) {
 
@@ -203,16 +205,6 @@ public class MultiplayerScene extends ChallengeScene {
     }
   }
 
-  /**
-   * Empties the pieceboard and displays the piece in the visual pieceboard
-   *
-   * @param piece piece to be displayed
-   */
-  @Override
-  public void nextpiece(GamePiece piece) {
-    pieceboard.emptygrid();
-    pieceboard.displaypiece(piece);
-  }
 
   /** Send request for scores to the server */
   public void sendscores() {
@@ -221,6 +213,7 @@ public class MultiplayerScene extends ChallengeScene {
 
   /**
    * Constructs an array of name and scores, then initialises a leaderboard and adds it to the scene
+   * @param scores scores to load
    */
   public void loadScores(String[] scores) {
     List<Pair<String, Integer>> nameandscores = new ArrayList<>();
@@ -231,6 +224,7 @@ public class MultiplayerScene extends ChallengeScene {
       nameandscores.add(new Pair<>(name, score));
     }
     leaderboard = new Leaderboard(nameandscores, "local", communicator);
+    leaderboard.setAlignment(Pos.CENTER);
     rightsidevbox.getChildren().clear();
     rightsidevbox.getChildren().addAll(leaderboard, pieceboardvbox);
   }
@@ -313,11 +307,12 @@ public class MultiplayerScene extends ChallengeScene {
   /**
    * Executes the score scene when the game ends
    *
-   * @param game
+   * @param game game instance
    */
   @Override
   public void gameended(Game game) {
     logger.info("game ended");
+    multimedia.stopmusicplayer();
     timeline.stop();
     gameWindow.startmultiscores(game, leaderboard.getScoreslist());
   }

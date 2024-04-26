@@ -8,7 +8,7 @@ import org.apache.logging.log4j.Logger;
 
 import uk.ac.soton.comp1206.ui.GameWindow;
 
-/** JavaFX Application class */
+/** JavaFX Application class*/
 public class App extends Application {
 
   /** Base resolution width */
@@ -21,6 +21,8 @@ public class App extends Application {
   private static final Logger logger = LogManager.getLogger(App.class);
   private Stage stage;
 
+  /**Default constructor*/
+  public App(){}
   /**
    * Start the game
    *

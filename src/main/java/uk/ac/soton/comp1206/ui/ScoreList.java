@@ -14,6 +14,10 @@ import javafx.util.Pair;
 
 import java.util.List;
 
+
+/**
+ * ScoresList is a custom component that takes in a list of name, score pairs and adds them to its own vbox, to display in the game.
+ */
 public class ScoreList extends VBox {
 
   /** Set of colours for different name+score pairs */
@@ -33,7 +37,14 @@ public class ScoreList extends VBox {
   /** Lists of name score pairs */
   protected ObservableList<Pair<String, Integer>> scores;
 
+  /**
+   * List of name, score pairs
+   */
   protected List<Pair<String, Integer>> scoreslist;
+
+  /**
+   * Property of the scoreslist.
+   */
   SimpleListProperty scoresProperty;
 
   /**

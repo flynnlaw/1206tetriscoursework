@@ -29,6 +29,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * The Score Scene displays the top 10 online scores and the top 10 local scores when the game is over.
+ */
+
 public class ScoresScene extends BaseScene {
 
   private static final Logger logger = LogManager.getLogger(ScoresScene.class);
@@ -227,12 +231,16 @@ public class ScoresScene extends BaseScene {
     }
   }
 
-  /** Returns minimum score from local file */
+  /** Returns minimum score from local file
+   * @return minimum score
+   */
   public int getMinimumScore() {
     return scoresList.get(scoresList.size() - 1).getValue();
   }
 
-  /** Returns minimum score from server */
+  /** Returns minimum score from server
+   * @return minimum online score
+   */
   public int getMinimumOnlineScore() {
     return onlinescoredisplay.getScoreslist().get(9).getValue();
   }

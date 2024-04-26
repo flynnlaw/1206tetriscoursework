@@ -87,7 +87,9 @@ public class GameWindow {
     loadScene(new ChallengeScene(this));
   }
 
-  /** Display the multiplayer challenge */
+  /** Display the multiplayer challenge
+   * @param communicator communicator instance
+   */
   public void startMultiplayerChallenge(Communicator communicator) {
     loadScene(new MultiplayerScene(this, communicator));
   }
@@ -97,12 +99,17 @@ public class GameWindow {
     loadScene(new InstructionsScene(this));
   }
 
-  /** Initialise the scores scene */
+  /** Initialise the scores scene
+   * @param game instance of game
+   */
   public void startscores(Game game) {
     loadScene(new ScoresScene(this, game));
   }
 
-  /** Initialise the multiplayer scores scene */
+  /** Initialise the multiplayer scores scene
+   * @param game game instance
+   * @param scores scores list
+   */
   public void startmultiscores(Game game, List<Pair<String, Integer>> scores) {
     loadScene(new MultiplayerScoreScene(this, game, scores));
   }

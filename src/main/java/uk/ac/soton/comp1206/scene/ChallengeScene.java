@@ -264,6 +264,7 @@ public class ChallengeScene extends BaseScene
   public void nextpiece(GamePiece piece) {
     pieceboard.emptygrid();
     board.resethoveredstate();
+    board.makeblockhover(piece, board.getSelectedCol(), board.getSelectedRow());
     pieceboard.displaypiece(piece);
   }
 
@@ -294,11 +295,11 @@ public class ChallengeScene extends BaseScene
   /**
    * Resets the animated timer and resets its animation with the passed in delay
    *
-   * @param delay
+   * @param delay timer delay
    */
   @Override
   public void timerstarted(int delay) {
-    logger.info("new timer started");
+    logger.info("Timer started");
     // Configure timer rectangle and timeline
     timerectangle.setWidth(800);
     timerectangle.setHeight(22);
@@ -317,7 +318,7 @@ public class ChallengeScene extends BaseScene
 
   @Override
   public void timerstopped(int delay) {
-    logger.info("timer stopped");
+    logger.info("Timer stopped");
     timeline.stop();
     fillTransition.pause();
     fillTransition.playFromStart();
@@ -327,7 +328,7 @@ public class ChallengeScene extends BaseScene
   /**
    * Defines the timer, rectangle, and its associated animation
    *
-   * @param delay
+   * @param delay timer delay
    */
   @Override
   public void timercreated(int delay) {
@@ -351,7 +352,7 @@ public class ChallengeScene extends BaseScene
   /**
    * Executes the score scene when the game ends
    *
-   * @param game
+   * @param game game instance for scoring
    */
   @Override
   public void gameended(Game game) {
@@ -361,7 +362,9 @@ public class ChallengeScene extends BaseScene
     gameWindow.startscores(game);
   }
 
-  /** Gets the current highest local score and displays it in the scene */
+  /** Gets the current highest local score and displays it in the scene
+   * @return high score from file
+   */
   public int getHighScore() {
     try (BufferedReader reader =
         new BufferedReader(new FileReader("src/main/resources/localscores.txt"))) {

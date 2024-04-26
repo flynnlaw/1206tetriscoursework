@@ -34,6 +34,7 @@ public class MultiplayerGame extends Game {
    *
    * @param cols number of columns
    * @param rows number of rows
+   * @param communicator communicator instance
    */
   public MultiplayerGame(int cols, int rows, Communicator communicator) {
     super(cols, rows);
@@ -82,6 +83,11 @@ public class MultiplayerGame extends Game {
     }
   }
 
+  /**
+   * Spawn new piece
+   * @param value value of the piece
+   * @return created piece
+   */
   public GamePiece spawnPiece(int value) {
     int[][] blocks = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
     GamePiece newpiece = null;

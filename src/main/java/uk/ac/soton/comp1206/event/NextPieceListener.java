@@ -9,9 +9,13 @@ import uk.ac.soton.comp1206.game.GamePiece;
  */
 public interface NextPieceListener {
 
-  /** Handle when a piece has changed */
+  /** Handle when a piece has changed
+   * @param piece piece to update
+   */
   void nextpiece(GamePiece piece);
 
-  /** Handle when a piece has changed */
+  /** Handle when a piece has changed
+   * @param piece piece to update
+   */
   void followingpiece(GamePiece piece);
 }
